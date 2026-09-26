@@ -1008,23 +1008,24 @@ const MusicSys = (function(){
     // The only theme in the game that goes wide instead of staying in
     // one place: an open fifth grows, the major third finally arrives
     // and it becomes a chord, then all fourteen sound at once and the
-    // floor drops out from under them. It resolves, and then there is
-    // nothing left to resolve into.
+    // floor drops out. Peaks are kept deliberately low per-voice — the
+    // chord sums across six oscillators, and every other ending lands
+    // under 0.4 summed, so anything louder here clips the master bus.
     THE_RELEASE: [
-      [146.83, 0.00, 3.2, 'sine', 0.06],
-      [220.00, 0.30, 3.2, 'sine', 0.06],
-      [293.66, 0.60, 3.2, 'triangle', 0.06],
-      [369.99, 0.90, 3.2, 'sine', 0.06],
-      [440.00, 1.20, 3.4, 'sine', 0.07],
-      [587.33, 1.50, 3.6, 'triangle', 0.06],
-      [739.99, 1.80, 3.8, 'sine', 0.05],
-      [146.83, 2.40, 5.2, 'sine', 0.10],
-      [220.00, 2.40, 5.2, 'sine', 0.09],
-      [293.66, 2.40, 5.2, 'triangle', 0.08],
-      [369.99, 2.40, 5.2, 'sine', 0.07],
-      [440.00, 2.40, 5.2, 'sine', 0.08],
-      [587.33, 2.40, 5.2, 'sine', 0.06],
-      [73.42, 3.00, 2.4, 'sine', 0.11]
+      [146.83, 0.00, 1.6, 'sine', 0.055],
+      [220.00, 0.28, 1.6, 'sine', 0.055],
+      [293.66, 0.56, 1.7, 'triangle', 0.050],
+      [369.99, 0.84, 1.7, 'sine', 0.050],
+      [440.00, 1.12, 1.8, 'sine', 0.050],
+      [587.33, 1.40, 1.9, 'triangle', 0.045],
+      [739.99, 1.68, 2.0, 'sine', 0.040],
+      [146.83, 2.40, 4.6, 'sine', 0.035],
+      [220.00, 2.40, 4.6, 'sine', 0.032],
+      [293.66, 2.40, 4.6, 'triangle', 0.030],
+      [369.99, 2.40, 4.6, 'sine', 0.026],
+      [440.00, 2.40, 4.6, 'sine', 0.030],
+      [587.33, 2.40, 4.6, 'sine', 0.024],
+      [73.42, 3.00, 2.4, 'sine', 0.050]
     ]
   };
 
@@ -2459,6 +2460,22 @@ function syncPlayerDOM(){
    WIRE UP BUTTONS
    ========================================================= */
 function init(){
+  // Browsers only let an AudioContext leave the "suspended" state inside a
+  // real user gesture. The first sound in this game is scheduled from a
+  // setTimeout deep in the cold open — 10+ seconds after the click that
+  // started it — so the context would be created suspended and every
+  // oscillator scheduled into it would be silent until the player happened
+  // to click something else. Unlock it on the first interaction of any kind.
+  let unlocked = false;
+  function unlockAudio(){
+    if(unlocked) return;
+    unlocked = true;
+    const c = getAudioCtx();
+    if(c && c.state === 'suspended') c.resume();
+    ['pointerdown','keydown','touchstart'].forEach(ev=>window.removeEventListener(ev, unlockAudio));
+  }
+  ['pointerdown','keydown','touchstart'].forEach(ev=>window.addEventListener(ev, unlockAudio));
+
   document.getElementById('btnContinue').disabled = !hasSave();
 
   document.getElementById('btnNewGame').addEventListener('click', startIntro);

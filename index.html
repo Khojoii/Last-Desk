@@ -805,6 +805,12 @@ const AudioSys = (function(){
   }
   return {
     click(){ beep(320,0.06,'sine',0.04); },
+    // Per-character blip for the cold open's typed title cards. It fires up to
+    // 31 times a second, so it has to be tiny and short — anything heavier
+    // turns the intro into a buzzsaw. Pitch wanders a little per character so
+    // a line of text reads as a hand typing rather than a machine gun, and
+    // `weight` pushes the last card up so "Wake up, Fifteen" lands harder.
+    type(weight){ beep(880+Math.random()*640, 0.017, 'square', 0.016*(weight||1)); },
     footstep(){ beep(90+Math.random()*20,0.045,'triangle',0.02); },
     pickup(){ beep(520,0.09,'triangle',0.05); setTimeout(()=>beep(780,0.12,'triangle',0.05),70); },
     notify(){ beep(660,0.14,'sine',0.05); },
@@ -1481,9 +1487,36 @@ const HOTSPOTS = [
   {obj:'phone', x:821, y:171, r:52, label:'Telephone'}
 ];
 
-const keys = {};
+const keys = {up:false, down:false, left:false, right:false};
 let joyVec = {x:0,y:0};
 let nearObj = null;
+
+// Movement is bound by physical key position as well as by character. e.key
+// reports the character a layout *produces*, so on AZERTY the physical W
+// position is 'z' and on Dvorak it is something else again — a WASD binding
+// keyed on e.key alone does nothing on those layouts, which is exactly how
+// you end up moving with the arrow keys but not the letter keys. e.code is
+// layout-independent, so we accept either half.
+const MOVE_KEYS = {
+  'w':'up',        'arrowup':'up',    'keyw':'up',
+  's':'down',      'arrowdown':'down','keys':'down',
+  'a':'left',      'arrowleft':'left','keya':'left',
+  'd':'right',     'arrowright':'right','keyd':'right'
+};
+function moveDir(e){
+  if(!e) return null;
+  return MOVE_KEYS[String(e.key||'').toLowerCase()]
+      || MOVE_KEYS[String(e.code||'').toLowerCase()]
+      || null;
+}
+// Returns true when the event was a movement key, so the caller can also
+// suppress the browser's own handling (arrow keys scroll the page).
+function applyMoveKey(e, down){
+  const dir = moveDir(e);
+  if(!dir) return false;
+  keys[dir] = down;
+  return true;
+}
 
 function setupInput(){
   window.addEventListener('keydown', (e)=>{
@@ -1491,16 +1524,20 @@ function setupInput(){
       if(e.key==='Escape') closeTopModal();
       return;
     }
+    if(applyMoveKey(e, true)){ e.preventDefault(); return; }
     const k = e.key.toLowerCase();
-    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) keys[k]=true;
     if(k==='e') tryInteract();
     if(k==='i') toggleInventory();
     if(k==='j') toggleJournal();
     if(k==='escape') togglePause();
   });
   window.addEventListener('keyup', (e)=>{
-    const k = e.key.toLowerCase();
-    if(['w','a','s','d','arrowup','arrowdown','arrowleft','arrowright'].includes(k)) keys[k]=false;
+    if(applyMoveKey(e, false)){ e.preventDefault(); return; }
+  });
+  // Alt-tabbing or losing focus mid-step never delivers the keyup, which
+  // would otherwise leave the player walking into a wall forever.
+  window.addEventListener('blur', ()=>{
+    keys.up = keys.down = keys.left = keys.right = false;
   });
 
   // touch joystick
@@ -1564,10 +1601,10 @@ let walkFrameOn = false;
 let lastFrameSwapAt = 0;
 function updatePlayer(dt){
   let dx=0, dy=0;
-  if(keys['w']||keys['arrowup']) dy -= 1;
-  if(keys['s']||keys['arrowdown']) dy += 1;
-  if(keys['a']||keys['arrowleft']) dx -= 1;
-  if(keys['d']||keys['arrowright']) dx += 1;
+  if(keys.up) dy -= 1;
+  if(keys.down) dy += 1;
+  if(keys.left) dx -= 1;
+  if(keys.right) dx += 1;
   dx += joyVec.x; dy += joyVec.y;
   const len = Math.hypot(dx,dy);
   if(len>0){ dx/=len; dy/=len; }
@@ -2326,18 +2363,20 @@ function playIntroLine(i){
   holder.appendChild(p);
   const full = INTRO_LINES[i];
   let c = 0;
-  const speed = (i === INTRO_LINES.length-1) ? 70 : 32; // last line lands slower, heavier
+  const isLast = (i === INTRO_LINES.length-1);
+  const speed = isLast ? 70 : 32; // last line lands slower, heavier
   introTypeTimer = setInterval(()=>{
     if(!introActive){ clearInterval(introTypeTimer); return; }
     c++;
     p.innerHTML = full.slice(0,c) + '<span class="cursor">\u258c</span>';
+    AudioSys.type(isLast ? 1.4 : 1);
     if(c >= full.length){
       clearInterval(introTypeTimer);
       introHoldTimer = setTimeout(()=>{
         if(!introActive) return;
         p.classList.add('fading');
         introFadeTimer = setTimeout(()=>{ playIntroLine(i+1); }, 950);
-      }, i === INTRO_LINES.length-1 ? 1500 : 1150);
+      }, isLast ? 1500 : 1150);
     }
   }, speed);
 }

@@ -86,9 +86,43 @@
     position:absolute; inset:0; z-index:58; pointer-events:none;
     background: radial-gradient(ellipse at center, transparent 42%, rgba(4,2,6,.55) 92%, rgba(2,1,3,.8) 100%);
   }
-  /* full-screen jumpscare flash — toggled briefly by script on the
-     game's most unsettling beats (knocks, midnight, the reveal at
-     the window, opening the door) */
+  /* ---- jumpscares -------------------------------------------------
+     Six beats in this game scare the player, and they are not the same
+     event each time. The room is not a monster — it is a filing system
+     that has learned to be patient — so its worst moments are not gore
+     flashes but the specific texture of a thing being processed: the
+     clock freezing, a third knock arriving, a photograph showing a time
+     you have not lived yet, the window showing you the room from
+     outside, an index coming apart, a door that only exists because
+     you chose it.
+
+     Each variant owns its colour, its shake and its sound. They are not
+     equally violent — a distant knock should not land like the door — but
+     every one of them is a strike, so there is no variant here that fades
+     in gently. */
+
+  /* Honour the OS setting. Someone who gets a headache from flashing
+     images should still get the sting, but not the strobe, and never the
+     shake. This is the only concession to accessibility in the file, and
+     it is deliberate: a scare you have opted out of is worth more than a
+     scare that puts someone in hospital. */
+  @media (prefers-reduced-motion: reduce){
+    .shake-strong, .shake-triple, .shake-door, .shake-shutter,
+    .shake-freeze, .shake-twitch, .shake-bloom,
+    #room.screenshake, #room.screenshake-strong{ animation: none !important; }
+    .scare-flash.active{ animation: scReduced .3s linear 1 !important; }
+    /* the figure still appears — it is the content, not decoration — but
+       it arrives without the slam, and it holds still instead of lurching */
+    .scare-figure .sf-slot{ animation: none !important; transform: none !important; }
+    .scare-figure.active{ animation: scReduced .45s linear 1 !important; }
+    @keyframes scReduced{
+      0%{ opacity:0; }
+      10%{ opacity:.9; }
+      25%{ opacity:.25; }
+      40%{ opacity:.8; }
+      100%{ opacity:0; }
+    }
+  }
   .scare-flash{
     position:absolute; inset:0; z-index:65; pointer-events:none;
     opacity:0; background: radial-gradient(ellipse at center, rgba(255,255,255,.9), rgba(160,10,10,.85) 55%, rgba(0,0,0,.9) 100%);
@@ -114,7 +148,387 @@
     80%{ opacity:.1; transform:scale(1); }
     100%{ opacity:0; transform:scale(1); }
   }
-  #room.screenshake-strong{ animation: shakeStrongAnim .5s steps(10); }
+
+  /* 1. MIDNIGHT — the clock stops. The white of a dead CRT hitting the
+     full screen and stuttering, then a hard black snap. It overshoots
+     inward, so it feels like the frame lurching rather than a lamp fading. */
+  .scare-flash.sc-clock{
+    background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(190,215,255,.75) 26%, rgba(0,0,0,.96) 78%);
+  }
+  .scare-flash.sc-clock.active{ animation: scClock .8s steps(9) 1; }
+  @keyframes scClock{
+    0%{ opacity:0; transform:scale(1.3); }
+    4%{ opacity:1; transform:scale(1.04); }
+    9%{ opacity:.15; transform:scale(1); }
+    14%{ opacity:1; transform:scale(1.02); }
+    22%{ opacity:.1; }
+    27%{ opacity:.9; }
+    34%{ opacity:.12; }
+    40%{ opacity:1; transform:scale(.99); }
+    55%{ opacity:.2; }
+    65%{ opacity:.85; }
+    80%{ opacity:.1; }
+    100%{ opacity:0; transform:scale(.99); }
+  }
+
+  /* 2. THE THIRD KNOCK — Rule Three, paid off. Three separate full-
+     opacity hits the eye can count, each a different offset so the frame
+     never settles, then a fourth that is brighter and wider than the
+     first three. The first two are the room. The third is whatever was
+     waiting behind them. */
+  .scare-flash.sc-knock{
+    background: radial-gradient(ellipse at 50% 64%, rgba(255,255,255,1) 0%, rgba(190,20,20,.95) 42%, rgba(0,0,0,.97) 100%);
+  }
+  .scare-flash.sc-knock.active{ animation: scKnock .85s steps(11) 1; }
+  @keyframes scKnock{
+    0%,5%{ opacity:0; }
+    6%{ opacity:1; }
+    11%{ opacity:.05; }
+    15%{ opacity:1; }
+    20%{ opacity:.05; }
+    24%{ opacity:1; transform:scale(1.04); }
+    29%{ opacity:.06; }
+    33%{ opacity:1; transform:scale(1.09); }
+    40%{ opacity:.08; }
+    44%{ opacity:.95; transform:scale(1.02); }
+    56%{ opacity:.1; }
+    62%{ opacity:.7; }
+    74%{ opacity:.12; }
+    100%{ opacity:0; transform:scale(1); }
+  }
+
+  /* knocks one and two — someone is at the door, and it is only someone.
+     Still a real hit: a hard red slam from the door's side of the frame,
+     punched twice, with the whole screen going black between the two. */
+  .scare-flash.sc-distant{
+    background: radial-gradient(ellipse at 9% 80%, rgba(210,30,30,.9) 0%, rgba(90,0,0,.85) 45%, rgba(0,0,0,.92) 78%);
+  }
+  .scare-flash.sc-distant.active{ animation: scDistant .55s steps(6) 1; }
+  @keyframes scDistant{
+    0%{ opacity:0; }
+    6%{ opacity:.95; }
+    16%{ opacity:.05; }
+    24%{ opacity:.85; }
+    40%{ opacity:.2; }
+    55%{ opacity:.6; }
+    100%{ opacity:0; }
+  }
+
+  /* 3. THE PHOTOGRAPH — a camera, not a creature. Black and white, swept
+     like a print coming up in a tray, and it strobes on the way: the
+     flash going off four times, hard, the way a real one does. You are
+     holding a picture of 3:07. */
+  .scare-flash.sc-photo{
+    background: linear-gradient(180deg, rgba(0,0,0,.98) 0%, rgba(255,255,255,1) 45%, rgba(150,180,220,.8) 70%, rgba(0,0,0,.95) 100%);
+  }
+  .scare-flash.sc-photo.active{ animation: scPhoto .6s steps(8) 1; }
+  @keyframes scPhoto{
+    0%{ opacity:0; }
+    4%{ opacity:1; }
+    10%{ opacity:.08; }
+    15%{ opacity:1; }
+    21%{ opacity:.1; }
+    26%{ opacity:1; }
+    33%{ opacity:.2; }
+    40%{ opacity:1; }
+    55%{ opacity:.45; }
+    70%{ opacity:.9; }
+    100%{ opacity:0; }
+  }
+
+  /* 4. THE WINDOW — the glass doing what the glass did in phase three:
+     a detuned television. Scanlines, static, and the pale wash of a room
+     seen from outside it, hitting hard and rolling like bad reception
+     before it holds on the last bright frame a beat too long. */
+  .scare-flash.sc-window{
+    background: repeating-linear-gradient(0deg, rgba(230,242,255,.7) 0 2px, rgba(0,0,0,.4) 2px 4px),
+                radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(150,190,235,.5) 38%, rgba(0,0,0,.95) 88%);
+  }
+  .scare-flash.sc-window.active{ animation: scWindow .7s steps(9) 1; }
+  @keyframes scWindow{
+    0%{ opacity:0; }
+    4%{ opacity:1; }
+    10%{ opacity:.2; }
+    16%{ opacity:1; }
+    23%{ opacity:.15; }
+    30%{ opacity:1; }
+    38%{ opacity:.25; }
+    45%{ opacity:1; }
+    55%{ opacity:.2; }
+    62%{ opacity:1; }
+    72%{ opacity:.35; }
+    82%{ opacity:.95; }
+    100%{ opacity:0; }
+  }
+
+  /* 5. THE PURGE — not gore, but it still hits. The index coming apart
+     and the fourteen coming out of it. It strikes first at full white,
+     then blooms outward and keeps stuttering on its way out, so the
+     release arrives like an impact instead of a sunrise. */
+  .scare-flash.sc-purge{
+    background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(205,255,235,.8) 32%, rgba(70,160,135,.45) 68%, rgba(0,0,0,.95) 100%);
+  }
+  .scare-flash.sc-purge.active{ animation: scPurge 1.05s steps(12) 1; }
+  @keyframes scPurge{
+    0%{ opacity:0; transform:scale(.8); }
+    5%{ opacity:1; transform:scale(1.03); }
+    11%{ opacity:.2; transform:scale(1.05); }
+    17%{ opacity:1; transform:scale(1.07); }
+    26%{ opacity:.25; transform:scale(1.09); }
+    33%{ opacity:.95; transform:scale(1.11); }
+    45%{ opacity:.3; transform:scale(1.13); }
+    55%{ opacity:.85; transform:scale(1.15); }
+    70%{ opacity:.25; transform:scale(1.17); }
+    100%{ opacity:0; transform:scale(1.2); }
+  }
+
+  /* 5b. THE PURGE, WITH ONE LEFT BEHIND — the same strike, but it keeps
+     collapsing partway through and never finishes opening. The sweep
+     rises and one voice of the six is missing, so the release sounds like
+     a release with a hole in it, on screen and in the ear. */
+  .scare-flash.sc-purge-hold{
+    background: radial-gradient(ellipse at center, rgba(255,255,255,.95) 0%, rgba(170,205,195,.55) 32%, rgba(40,75,70,.5) 68%, rgba(0,0,0,.97) 100%);
+  }
+  .scare-flash.sc-purge-hold.active{ animation: scPurgeHold 1.05s steps(10) 1; }
+  @keyframes scPurgeHold{
+    0%{ opacity:0; transform:scale(.82); }
+    5%{ opacity:1; transform:scale(1.02); }
+    13%{ opacity:.1; transform:scale(1.05); }
+    20%{ opacity:.85; transform:scale(1.06); }
+    30%{ opacity:.12; }
+    40%{ opacity:.7; transform:scale(1.08); }
+    52%{ opacity:.1; }
+    64%{ opacity:.55; transform:scale(1.09); }
+    78%{ opacity:.12; }
+    100%{ opacity:0; transform:scale(1.1); }
+  }
+
+  /* 6. THE DOOR — the deepest red in the game, and the only one that
+     closes. The iris slams shut and keeps stuttering on the way, because
+     the subject log was right: the door is only real if you open it. */
+  .scare-flash.sc-door{
+    background: radial-gradient(ellipse at center, rgba(255,150,135,.55) 0%, rgba(150,0,0,.92) 36%, rgba(0,0,0,.99) 80%);
+  }
+  .scare-flash.sc-door.active{ animation: scDoor .95s steps(11) 1; }
+  @keyframes scDoor{
+    0%{ opacity:0; background-size:190% 190%; }
+    5%{ opacity:1; background-size:172% 172%; }
+    12%{ opacity:.25; background-size:150% 150%; }
+    18%{ opacity:1; background-size:120% 120%; }
+    26%{ opacity:.3; background-size:100% 100%; }
+    34%{ opacity:1; background-size:82% 82%; }
+    46%{ opacity:.2; background-size:68% 68%; }
+    56%{ opacity:.9; background-size:54% 54%; }
+    70%{ opacity:.25; background-size:40% 40%; }
+    84%{ opacity:.8; background-size:26% 26%; }
+    100%{ opacity:0; background-size:12% 12%; }
+  }
+
+  /* ---- the figures ----
+     The colour flashes were never the frightening part; they are just
+     light. These are. Each one is a pixel sprite drawn at full bleed
+     with image-rendering off, so every block stays hard-edged and the
+     figure looks like it belongs to the same game as the furniture
+     instead of like a photograph dropped on top of it.
+
+     The wrapper does the movement (the slam, the shudder, the crawl)
+     and the inner SVG stays still, because scaling a wrapper is cheap
+     and re-rasterising a 60-row sprite every frame is not. */
+  .scare-figure{
+    position:absolute; inset:0; z-index:66;
+    pointer-events:none; overflow:hidden;
+    opacity:0; display:flex; align-items:center; justify-content:center;
+  }
+  .scare-figure > .sf-slot{
+    display:flex; align-items:center; justify-content:center;
+    width:100%; height:100%; will-change:transform;
+  }
+  .scare-figure svg{
+    height:100%; width:auto; max-width:none;
+    shape-rendering:crispEdges;
+    image-rendering:pixelated;
+  }
+  /* A 30x64 body fitted inside a 16:9 room is a sliver, so the tall
+     figures deliberately overflow the frame and get cropped by it —
+     being too big to see all of is the point. Faces and the clock
+     already fill the height, so they stay at 100%. */
+  .scare-figure[data-fig="figure"] svg,
+  .scare-figure[data-fig="photo"] svg{ height:136%; }
+  .scare-figure[data-fig="hands"] svg{ height:112%; }
+  /* a hard red wash over the figure itself, so it is lit by the same
+     beat as the flash behind it and never looks pasted on */
+  .scare-figure::after{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(120,0,0,.55) 100%);
+    mix-blend-mode:multiply;
+  }
+  .scare-figure.active{ animation: sfFade 1.2s steps(1) forwards 1; }
+  /* the wrapper owns the figure's whole life — up instantly, then hold
+     it on screen long after the last movement so the image is the thing
+     left in the player's eyes. the slot owns only the motion, and holds
+     its final pose so there is no snap back to scale(1) on release. */
+  @keyframes sfFade{
+    0%{ opacity:0; }
+    4%{ opacity:1; }
+    82%{ opacity:1; }
+    100%{ opacity:0; }
+  }
+
+  /* per-variant entry. These are all instant: the first frame is the
+     figure at full size, which is the entire point. */
+  .scare-figure.sf-slam   .sf-slot{ animation: sfSlam   .62s cubic-bezier(.2,.9,.1,1) forwards 1; }
+  .scare-figure.sf-lunge  .sf-slot{ animation: sfLunge  .78s steps(1) forwards 1; }
+  .scare-figure.sf-press  .sf-slot{ animation: sfPress  .9s steps(1) forwards 1; }
+  .scare-figure.sf-swarm  .sf-slot{ animation: sfSwarm  1.1s steps(1) forwards 1; }
+  .scare-figure.sf-grab   .sf-slot{ animation: sfGrab   1.05s steps(1) forwards 1; }
+  .scare-figure.sf-turn   .sf-slot{ animation: sfTurn   1.15s cubic-bezier(.3,0,.2,1) forwards 1; }
+
+  @keyframes sfSlam{
+    0%{ transform:scale(3.4) translateY(4%); }
+    6%{ transform:scale(1.06) translateY(0); }
+    14%{ transform:scale(1.12) translateX(-1.5%); }
+    26%{ transform:scale(1.04) translateX(1%); }
+    40%{ transform:scale(1.09) translateX(-.7%); }
+    100%{ transform:scale(1.16) translateX(0); }
+  }
+  @keyframes sfLunge{
+    0%{ transform:scale(2.6) translateY(-8%); }
+    8%{ transform:scale(1.5) translateY(0); }
+    20%{ transform:scale(1.62) translateY(-1%); }
+    34%{ transform:scale(1.5); }
+    46%{ transform:scale(1.58) translateY(1%); }
+    58%{ transform:scale(1.5); }
+    70%{ transform:scale(1.56) translateY(-.5%); }
+    100%{ transform:scale(1.7); }
+  }
+  @keyframes sfPress{
+    0%{ transform:scale(1.9) translateY(10%); opacity:1; }
+    12%{ transform:scale(1.28) translateY(0); }
+    26%{ transform:scale(1.34) translateX(-.8%); }
+    40%{ transform:scale(1.29) translateX(.6%); }
+    56%{ transform:scale(1.33) translateY(-.5%); }
+    100%{ transform:scale(1.45) translateY(0); }
+  }
+  @keyframes sfSwarm{
+    0%{ transform:scale(4.2) translateY(14%); }
+    10%{ transform:scale(2.4) translateY(4%); }
+    30%{ transform:scale(2.7) translateY(2%); }
+    50%{ transform:scale(2.45) translateY(5%); }
+    70%{ transform:scale(2.8) translateY(1%); }
+    100%{ transform:scale(3.1) translateY(4%); }
+  }
+  @keyframes sfGrab{
+    0%{ transform:scale(3.8) translateY(18%); }
+    9%{ transform:scale(1.7) translateY(6%); }
+    24%{ transform:scale(1.9) translateY(4%); }
+    42%{ transform:scale(1.75) translateY(8%); }
+    60%{ transform:scale(1.95) translateY(3%); }
+    80%{ transform:scale(1.8) translateY(7%); }
+    100%{ transform:scale(2.1) translateY(2%); }
+  }
+  @keyframes sfTurn{
+    0%{ transform:scale(2.9) rotate(-3deg); }
+    7%{ transform:scale(1.7) rotate(0); }
+    22%{ transform:scale(1.78) rotate(1.2deg); }
+    38%{ transform:scale(1.72) rotate(-.6deg); }
+    56%{ transform:scale(1.8) rotate(.4deg); }
+    100%{ transform:scale(1.95) rotate(0); }
+  }
+
+  /* tint per beat, so the figure is lit by the same event as the flash */
+  .scare-figure[data-tint="red"]::after{ background:radial-gradient(ellipse at center, rgba(255,60,50,.18) 0%, rgba(150,0,0,.62) 100%); }
+  .scare-figure[data-tint="blood"]::after{ background:radial-gradient(ellipse at center, rgba(120,0,0,.2) 0%, rgba(40,0,0,.78) 100%); }
+  .scare-figure[data-tint="cold"]::after{ background:radial-gradient(ellipse at center, rgba(190,225,255,.2) 0%, rgba(10,30,60,.6) 100%); }
+  .scare-figure[data-tint="static"]::after{ background:radial-gradient(ellipse at center, rgba(210,230,255,.26) 0%, rgba(0,10,20,.72) 100%); }
+  .scare-figure[data-tint="rot"]::after{ background:radial-gradient(ellipse at center, rgba(180,200,150,.16) 0%, rgba(20,30,18,.7) 100%); }
+  .scare-figure[data-tint="steel"]::after{ background:radial-gradient(ellipse at center, rgba(220,235,240,.2) 0%, rgba(6,14,18,.7) 100%); }
+
+  /* ---- shakes, one character per beat ----
+     None of these are 1px. A shake that small is a shiver you can read
+     as decoration; the point is to make the frame look like it has been
+     hit by something, so even the "gentle" ones here travel. */
+  /* the door: the hardest thing in the game */
+  .shake-strong{ animation: shakeStrongAnim .5s steps(10); }
+  /* the freeze: not a shake at all — the room jolts, holds dead still,
+     then settles, which reads worse than continuous movement because
+     nothing in the room is supposed to still be there to move */
+  .shake-freeze{ animation: shakeFreezeAnim .7s steps(3); }
+  @keyframes shakeFreezeAnim{
+    0%{ transform:translate(0,0); }
+    5%{ transform:translate(0,6px) scale(1.01); }
+    10%{ transform:translate(0,6px); }
+    30%{ transform:translate(0,6px); }
+    36%{ transform:translate(2px,2px); }
+    42%{ transform:translate(0,0); }
+    60%{ transform:translate(0,0); }
+    68%{ transform:translate(-1px,1px); }
+    100%{ transform:translate(0,0); }
+  }
+  /* three hits, countable, matching the three flash pulses, then the
+     fourth: bigger, off-axis, and it does not come back to centre */
+  .shake-triple{ animation: shakeTripleAnim .85s steps(1); }
+  @keyframes shakeTripleAnim{
+    0%,5%{ transform:translate(0,0); }
+    6%{ transform:translate(-13px,9px); }
+    13%{ transform:translate(0,0); }
+    19%{ transform:translate(12px,-11px); }
+    25%{ transform:translate(0,0); }
+    31%{ transform:translate(-16px,12px) scale(1.02); }
+    38%{ transform:translate(9px,7px) scale(1.01); }
+    46%{ transform:translate(-6px,-4px); }
+    54%{ transform:translate(4px,3px); }
+    64%{ transform:translate(-3px,2px); }
+    76%{ transform:translate(2px,-1px); }
+    100%{ transform:translate(0,0) scale(1); }
+  }
+  /* the glass shattering, not shivering */
+  .shake-twitch{ animation: shakeTwitchAnim .45s steps(5); }
+  @keyframes shakeTwitchAnim{
+    0%{ transform:translate(0,0); }
+    8%{ transform:translate(-7px,4px); }
+    20%{ transform:translate(6px,-5px) scale(1.008); }
+    34%{ transform:translate(-5px,6px); }
+    48%{ transform:translate(4px,-3px); }
+    64%{ transform:translate(-3px,2px); }
+    82%{ transform:translate(2px,-1px); }
+    100%{ transform:translate(0,0) scale(1); }
+  }
+  /* a knock from outside: the frame is struck from the door's side, so it
+     leans that way and rocks back rather than jiggling in place */
+  .shake-door{ animation: shakeDoorAnim .5s cubic-bezier(.3,.9,.4,1); }
+  @keyframes shakeDoorAnim{
+    0%{ transform:translate(0,0); }
+    6%{ transform:translate(-8px,3px); }
+    18%{ transform:translate(0,0); }
+    26%{ transform:translate(-6px,2px); }
+    44%{ transform:translate(0,0); }
+    58%{ transform:translate(-3px,1px); }
+    100%{ transform:translate(0,0); }
+  }
+  /* the shutter: a single hard jolt on the flash, then nothing, which is
+     what a camera actually does to you */
+  .shake-shutter{ animation: shakeShutterAnim .3s steps(2); }
+  @keyframes shakeShutterAnim{
+    0%{ transform:translate(0,0); }
+    12%{ transform:translate(2px,-7px) scale(1.006); }
+    30%{ transform:translate(-1px,2px) scale(1.003); }
+    50%{ transform:translate(1px,3px); }
+    72%{ transform:translate(0,-1px); }
+    100%{ transform:translate(0,0) scale(1); }
+  }
+  /* the floor going, as the index lets go */
+  .shake-bloom{ animation: shakeBloomAnim .9s cubic-bezier(.1,.8,.2,1); }
+  @keyframes shakeBloomAnim{
+    0%{ transform:translate(0,0) scale(1); }
+    5%{ transform:translate(0,10px) scale(1.03); }
+    11%{ transform:translate(0,-6px) scale(1.015); }
+    18%{ transform:translate(0,7px) scale(1.022); }
+    28%{ transform:translate(0,-4px) scale(1.012); }
+    40%{ transform:translate(0,3px) scale(1.008); }
+    56%{ transform:translate(0,-2px) scale(1.004); }
+    78%{ transform:translate(0,1px) scale(1.001); }
+    100%{ transform:translate(0,0) scale(1); }
+  }
   @keyframes shakeStrongAnim{
     0%,100%{ transform:translate(0,0); }
     10%{ transform:translate(-7px,5px); }
@@ -551,7 +965,17 @@
     font-family:var(--pf-display); font-size:.42rem; color:var(--ink-dim);
     letter-spacing:.04em;
   }
-  /* the one who talked to you — the only name the index was called by */
+  /* THE_THIRTEEN: Eleven is still inside the index. He holds position and
+     keeps his name, but the glow is taken off him and the sprite sits dim
+     and never brightens \u2014 the animation that says "freed" runs, so the
+     shape is right, and everything about the treatment says he isn't out. */
+  .freed.held{ opacity:.34; }
+  .freed.held svg{ animation:none; filter:grayscale(.85) brightness(.55); }
+  .freed.held .freed-name{
+    color:var(--ink-dim); text-decoration:line-through;
+    text-decoration-color:rgba(255,255,255,.3);
+  }
+  /* the one who talked to you— the only name the index was called by */
   .freed.known .freed-name{ color:var(--lamp); }
   .freed.known svg{ filter:drop-shadow(0 0 4px rgba(232,185,106,.45)); }
   @keyframes freedIn{ to{ opacity:1; transform:translateY(0); } }
@@ -600,6 +1024,7 @@
   <div class="vignette" aria-hidden="true"></div>
   <div class="tv-noise" aria-hidden="true"></div>
   <div class="scare-flash" id="scareFlash" aria-hidden="true"></div>
+<div class="scare-figure" id="scareFigure" aria-hidden="true"></div>
 
 
   <!-- MAIN MENU -->
@@ -759,8 +1184,9 @@
       <div class="freed-wake" id="freedWake"></div>
     </div>
     <div class="ending-stats">
-      <div>Clues found<b id="endClues">0 / 10</b></div>
-      <div>Important decisions<b id="endDecisions">0</b></div>
+  <div>Clues found<b id="endClues">0 / 14</b></div>
+  <div>Important decisions<b id="endDecisions">0</b></div>
+  <div>What you trusted<b id="endTrust">nothing yet</b></div>
     </div>
     <div class="menu-buttons">
       <button id="btnPlayAgain" class="primary">Play Again</button>
@@ -818,17 +1244,84 @@ const AudioSys = (function(){
     knock(){ beep(120,0.09,'square',0.08); setTimeout(()=>beep(120,0.09,'square',0.08),180); },
     clue(){ beep(500,0.1,'sine',0.05); setTimeout(()=>beep(700,0.15,'sine',0.05),90); setTimeout(()=>beep(940,0.18,'sine',0.05),190); },
     denied(){ beep(140,0.12,'sawtooth',0.05); },
-    scare(strong){
-      // a sudden dissonant stinger — sub thump + harsh high shriek + gritty mid clash
-      const k = strong ? 1.5 : 1;
-      beep(55, 0.5*k, 'square', 0.16*k);
-      beep(58, 0.5*k, 'sawtooth', 0.1*k);
-      beep(1400+Math.random()*300, 0.22*k, 'sawtooth', 0.09*k);
-      setTimeout(()=>beep(210, 0.3*k, 'square', 0.08*k), 40);
-      if(strong){
-        setTimeout(()=>beep(1900, 0.18, 'sawtooth', 0.07), 90);
-        setTimeout(()=>beep(45, 0.6, 'square', 0.14), 120);
+    /* One sting per beat. The identities differ, but every single one of
+       them is a strike, not an atmosphere: they all open with the same
+       violent body hit and a high shriek, and only the tail differs. A
+       scare that fades in gently is not a scare. */
+    impact(bodyGain, shriekGain, dur){
+      // the hit itself — instant, sub-heavy, and loud enough to hurt
+      beep(56, 0.42, 'square', bodyGain);
+      beep(59, 0.42, 'sawtooth', bodyGain*0.62);
+      beep(1500+Math.random()*400, 0.16, 'sawtooth', shriekGain);
+      // and the recoil: it doesn't stop, it decays into something worse
+      setTimeout(()=>beep(41, 0.7, 'sine', bodyGain*0.72), 55);
+      setTimeout(()=>beep(1900+Math.random()*400, 0.2, 'sawtooth', shriekGain*0.6), 90);
+      setTimeout(()=>beep(33, dur||1.1, 'sine', bodyGain*0.5), 150);
+    },
+    scare(kind){
+      const k = kind || 'door';
+      if(k === 'clock'){
+        // the tick does not stop — it is cut off mid-escape, and the
+        // silence it leaves has a floor dropping through it
+        beep(2400, 0.02, 'square', 0.2);
+        this.impact(0.3, 0.19, 1.6);
+        setTimeout(()=>beep(70, 0.5, 'square', 0.16), 200);
+        setTimeout(()=>beep(27, 2.2, 'sine', 0.14), 300);
+        return;
       }
+      if(k === 'distant'){
+        // someone is at the door, and they are not being quiet about it.
+        // Sits below the other variants on purpose: this is a knock, not an
+        // event, and the third knock has to be able to beat it.
+        beep(130, 0.1, 'square', 0.3);
+        setTimeout(()=>beep(118, 0.1, 'square', 0.34), 130);
+        setTimeout(()=>{ beep(46, 0.55, 'sine', 0.34); beep(1700, 0.1, 'sawtooth', 0.16); }, 160);
+        setTimeout(()=>beep(31, 1.3, 'sine', 0.2), 300);
+        return;
+      }
+      if(k === 'knock'){
+        // three knocks, and then a fourth one that is not the room
+        beep(125, 0.09, 'square', 0.32);
+        setTimeout(()=>beep(125, 0.09, 'square', 0.36), 150);
+        setTimeout(()=>beep(98, 0.26, 'square', 0.42), 300);
+        setTimeout(()=>{ this.impact(0.44, 0.34, 1.5); beep(48, 1.0, 'sine', 0.26); }, 350);
+        return;
+      }
+      if(k === 'photo'){
+        // a shutter, and then the room answering it
+        beep(2600, 0.02, 'square', 0.34);
+        setTimeout(()=>beep(1700, 0.04, 'square', 0.2), 50);
+        setTimeout(()=>beep(2400, 0.02, 'square', 0.15), 190);
+        setTimeout(()=>this.impact(0.4, 0.22, 1.2), 220);
+        return;
+      }
+      if(k === 'window'){
+        // a detuned television, and something behind the glass tapping
+        beep(64, 0.5, 'sawtooth', 0.3);
+        beep(1200, 0.42, 'sawtooth', 0.16);
+        setTimeout(()=>beep(1265, 0.4, 'sawtooth', 0.15), 110);
+        setTimeout(()=>{ for(let i=0;i<12;i++) beep(1000+Math.random()*1800, 0.016, 'square', 0.11); }, 190);
+        setTimeout(()=>this.impact(0.42, 0.28, 1.3), 240);
+        return;
+      }
+      if(k === 'purge' || k === 'purge-hold'){
+        // the index letting go. It hits first, the same as everything else,
+        // and the release chord climbs out of the impact. The held variant
+        // drops the sixth voice, so the chord lands a tone short and the
+        // absence is audible before the ending screen explains it.
+        this.impact(0.32, 0.15, 1.6);
+        beep(140, 1.4, 'sawtooth', 0.1);
+        const rise = k === 'purge'
+          ? [293.66, 369.99, 440.00, 587.33, 739.99, 880.00]
+          : [293.66, 369.99, 440.00, 587.33, 739.99];   // no sixth voice
+        rise.forEach((f,i)=>{
+          setTimeout(()=>beep(f, 0.55, 'triangle', 0.075), 90 + i*70);
+        });
+        return;
+      }
+      // 'door' — the heaviest thing in the game
+      this.impact(0.4, 0.3, 1.4);
+      setTimeout(()=>beep(44, 0.9, 'square', 0.22), 120);
     }
   };
 })();
@@ -1032,6 +1525,26 @@ const MusicSys = (function(){
       [440.00, 2.40, 4.6, 'sine', 0.030],
       [587.33, 2.40, 4.6, 'sine', 0.024],
       [73.42, 3.00, 2.4, 'sine', 0.050]
+    ],
+    // THE THIRTEEN (secret) \u2014 the same fourteen voices, but the eleventh
+    // never joins them. The chord lands a tone short, and then keeps
+    // arriving without it, so the absence is the loudest thing in it.
+    THE_THIRTEEN: [
+      [146.83, 0.00, 1.7, 'sine', 0.055],
+      [220.00, 0.30, 1.7, 'sine', 0.055],
+      [293.66, 0.60, 1.8, 'triangle', 0.050],
+      [369.99, 0.90, 1.8, 'sine', 0.050],
+      [440.00, 1.20, 1.9, 'sine', 0.050],
+      [587.33, 1.50, 2.0, 'triangle', 0.045],
+      [146.83, 2.50, 4.4, 'sine', 0.035],
+      [220.00, 2.50, 4.4, 'sine', 0.032],
+      [293.66, 2.50, 4.4, 'triangle', 0.030],
+      [369.99, 2.50, 4.4, 'sine', 0.026],
+      [440.00, 2.50, 4.4, 'sine', 0.030],
+      [73.42, 3.10, 2.6, 'sine', 0.052],
+      // the seat that stays empty, restated twice
+      [392.00, 4.30, 1.5, 'sine', 0.016],
+      [392.00, 5.10, 2.2, 'sine', 0.014]
     ]
   };
 
@@ -1216,9 +1729,331 @@ const PixelArt = (function(){
     return svg(PLAYER_IDLE, {K:PLAYER_PALETTE.K, e:PLAYER_PALETTE.e, R:s.R, r:s.r, F:s.F, B:s.B});
   }
 
-  return { iconHTML, playerSVG, freedSVG, freedCount, romanLabel:(i)=>ROMAN[i] || String(i+1) };
-})();
+  /* =========================================================
+     SCARE FIGURES
+     A wash of colour is not a threat — a face arriving at full
+     size is. These are the images the jumpscares actually show,
+     drawn in the same pixel grid the room draws everyone in, so
+     a figure that appears at 3am is built the same way as the
+     desk it was sitting on.
 
+     K outline/void, H pale flesh, h shadow, W bone highlight.
+     Generated so every row is exactly the same width, which is
+     what the rect-per-cell renderer needs.
+     ========================================================= *//* Jumpscare figures, generated so every row is the same width.
+   K outline/void, H pale flesh, h shadow, W bone/nail highlight. */
+const SCARE_FIGURE_GRIDS = {
+  GLASS_FACE: [
+    '..................................',
+    '.................H................',
+    '.............HHHHHHHHH............',
+    '...........HHHHHHHHHHHHH..........',
+    '..........HHHHHHHHHHHHHHH.........',
+    '.........HHHHHHHHHHHHHHHHH........',
+    '........HHHHHHHHHHHHHHHHHHH.......',
+    '........HHHHHHHHHHHHHHHHHHH.......',
+    '.......HHHHHHHHHHHHHHHHHHHHH......',
+    '......HHHHHHHHHHHHHHHHHHHHHHH.....',
+    '......HHHHHHHHHHHHHHHHHHHHHHH.....',
+    '......HHHHHHHHHHHHHHHHHHHHHHH.....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '....HHHHHHHHHHHHHHHHHHHHHHHHHHH...',
+    '.....HHHKKKKKHHHHHHHHHKKKKKHHH....',
+    '.....HKKKKKKKKKHHHHHKKKKKKKKKH....',
+    '.....HKKWWKKKKKHHhHHKKKKWWKKKH....',
+    '.....KKKKKKKKKKKhhhKKKKKKKKKKK....',
+    '.....HKKKKKKKKKhhhhhKKKKKKKKKH....',
+    '.....HKKKKKKKKKhhhhhKKKKKKKKKH....',
+    '......HHKKKKKhhhhhhhhhKKKKKHH.....',
+    '......HHhhhhhhhhhhhhhhhhhhhHH.....',
+    '......HhhhhhhhhhhhhhhhhhhhhhH.....',
+    '.......hhhhhhhhhhhhhhhhhhhhh......',
+    '.......hhhhKKKKKKKKKKKKhhhhh......',
+    '......hhhhhhKWKWKWKWKKhhhhhhh.....',
+    '.......hhhhhKKKKKKKKKKhhhhhh......',
+    '.......hhhhhhhhhhhhhhhhhhhhh......',
+    '.......hhhhhhhhhhhhhhhhhhhhh......',
+    '........hhhhhhhhhhhhhhhhhhh.......',
+    '........hhhhhhhhhhhhhhhhhhh.......',
+    '.........hhhhhhhhhhhhhhhhh........',
+    '...........hhhhhhhhhhhhh..........',
+  ],
+  SCREAM: [
+    '.................H................',
+    '.............HHHHHHHHH............',
+    '...........HHHHHHHHHHHHH..........',
+    '..........HHHHHHHHHHHHHHH.........',
+    '.........HHHHHHHHHHHHHHHHH........',
+    '........HHHHHHHHHHHHHHHHHHH.......',
+    '.......HHHHHHHHHHHHHHHHHHHHH......',
+    '......HHHHHHHHHHHHHHHHHHHHHHH.....',
+    '......HHHHHHHHHHHHHHHHHHHHHHH.....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '.....HHHHHHHHHHHHHHHHHHHHHHHHH....',
+    '....HHHHHHHHHHHHHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHHHHHHHHHHHHH...',
+    '....HHHHKKKKKHHHHHHHHHKKKKKHHHH...',
+    '....HHKKKKKKKKKHHHHHKKKKKKKKKHH...',
+    '...HHKKKKKKKKKKKHHHKKKKKKKKKKKHH..',
+    '....HKKWWKKKKKKKHHHKKKKKKWWKKKH...',
+    '....KKKKKKKKKKKKKHKKKKKKKKKKKKK...',
+    '....HKKKKKKKKKKKHHHKKKKKKKKKKKH...',
+    '....HKKKKKKKKKKKHHHKKKKKKKKKKKH...',
+    '....HHKKKKKKKKKHHKHHKKKKKKKKKHH...',
+    '....HHHHKKKKKHKKKKKKKHKKKKKHHHH...',
+    '.....HHHHHHHWWWWWWWWWWWHHHHHHH....',
+    '.....HHHHHHHhKWKWKWKWKhHHHHHHH....',
+    '.....HHHHHhhKKKKKKKKKKKhhHHHHH....',
+    '......HHhhhhKKKKKKKKKKKhhhhHH.....',
+    '......HHhhhhKKKKKKKKKKKhhhhHH.....',
+    '.......hhhhKKKKKKKKKKKKKhhhh......',
+    '.......hhhhhKKKKKKKKKKKhhhhh......',
+    '......hhhhhhKKKKKKKKKKKhhhhhh.....',
+    '.......hhhhhKKKKKKKKKKKhhhhh......',
+    '.......hhhhhhKKKKKKKKKhhhhhh......',
+    '........hhhhhWKWKWKWKWhhhhh.......',
+    '........hhhhhhKKKKKKKhhhhhh.......',
+    '..........hhhhhhhKhhhhhhh.........',
+    '............hhhhhhhhhhh...........',
+    '.................h................',
+  ],
+  FIGURE: [
+    '..............................',
+    '...............H..............',
+    '............HHHHHHH...........',
+    '...........HHHHHHHHH..........',
+    '..........HHHHHHHHHHH.........',
+    '..........HHHHHHHHHHH.........',
+    '.........HHHWWHHWWHHHH........',
+    '.........HHHHKKKKHHHHH........',
+    '.........HHHHKKKKHHHHH........',
+    '.........HHHHHHHHHHHHH........',
+    '........HHHHHHHHHHHHHHH.......',
+    '.........HHHHHHHHHHHHH........',
+    '.........HHHHKKKKKHHHH........',
+    '.........HHHHHHHHHHHHH........',
+    '.........HHHHHHhHHHHHH........',
+    '..........hhhhhhhhhhh.........',
+    '........hhhhhhhhhhhhhhh.......',
+    '......hhhhhhhhhhhhhhhhhhh.....',
+    '.....hhhhhhhhhhhhhhhhhhhhh....',
+    '....hhhhhhhhhhhhhhhhhhhhhhh...',
+    '....hhhhhhhhhhhhhhhhhhhhhhh...',
+    '...hhhhhhhhhhhhhhhhhhhhhhhhh..',
+    '...hhhhhhhhhhhhhhhhhhhhhhhhh..',
+    '...hhhhhhhhhhhhhhhhhhhhhhhhh..',
+    '..hhhhhhhhhhhhhhhhhhhhhhhhhhh.',
+    '...hhhhhhhhhhhhhhhhhhhhhhhhh..',
+    '...hhhhhhhhhhhhhhhhhhhhhhhhh..',
+    '...hhhhhhhhhhhhhhhhhhhhhhhhh..',
+    '....hhhhhhhhhhhhhhhhhhhhhhh...',
+    '....hhhhhhhhhhhhhhhhhhhhhhh...',
+    '....HhhhhhhhhhhhhhhhhhhhhhH...',
+    '....HHhhhhhhhhhhhhhhhhhhhHH...',
+    '....HHHHhhhhhhhhhhhhhhhHHHH...',
+    '....HHHHHHhhhhhhhhhhhHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '....HHHHHHHHHHHhHHHHHHHHHHH...',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HHHHHHHHhHHHHHHHH......',
+    '.......HhhhhhhHhHhhhhhhH......',
+    '.......HhhhhhhHhHhhhhhhH......',
+    '.......HhhhhhhHhHhhhhhhH......',
+    '.......HhhhhhhHhHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HhhhhhhHHHhhhhhhH......',
+    '.......HHHHHHHHHHHHHHHHH......',
+  ],
+  HANDS: [
+    '................................................',
+    '................................................',
+    '..............WWW......................WWW......',
+    '...........WWWWWW...................WWWWWW......',
+    '...........WWWHHHWWW................WWWHHHWWW...',
+    '...........HHHHhHWWW................HHHHhHWWW...',
+    '........WWWHhHHhHHHH.............WWWHhHHhHHHH...',
+    '........WWWHhHHhHHhH.............WWWHhHHhHHhH...',
+    '........HHHHhHHhHHhH.............HHHHhHHhHHhH...',
+    '........HhHHhHHhHHhH.............HhHHhHHhHHhH...',
+    '........HhHHhHHhHHhH.............HhHHhHHhHHhH...',
+    '........HhHHhHHhHHhH.............HhHHhHHhHHhH...',
+    '........HhHHhHHhHHhH.............HhHHhHHhHHhH...',
+    '....WWW.HhHHhHHhHHhH.........WWW.HhHHhHHhHHhH...',
+    '....WWW.HhHHhHHhHHhH.........WWW.HhHHhHHhHHhH...',
+    '....HHH.HhHHhHHhHHhH.........HHH.HhHHhHHhHHhH...',
+    '....HHH.HhHHhHHhHHhH.........HHH.HhHHhHHhHHhH...',
+    '....HHH.HhHHhHHhHHhH.........HHH.HhHHhHHhHHhH...',
+    '....HHH.HhHHhHHhHHhH.........HHH.HhHHhHHhHHhH...',
+    '....HHH.HHHHHHHHHHHH.........HHH.HHHHHHHHHHHH...',
+    '....HHH.hhhhhhhhhhhh.........HHH.hhhhhhhhhhhh...',
+    '....HHHHHHHHHHHHHHHH.........HHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHH.........HHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHH.........HHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHH.........HHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHH.........HHHHHHHHHHHHHHHH...',
+    '....HHHHHHHHHHHHHHHHH........HHHHHHHHHHHHHHHHH..',
+    '....HHHHHHHHHHHHHHHH.........HHHHHHHHHHHHHHHH...',
+    '....HhhhhhhhhhhhhhhH.........HhhhhhhhhhhhhhhH...',
+    '....HHhhhhhhhhhhhhHH.........HHhhhhhhhhhhhhHH...',
+    '......hhhhhhhhhhhhH............hhhhhhhhhhhhH....',
+    '.......HHHHHHHHHHH..............HHHHHHHHHHH.....',
+    '........HHHHHHHHH................HHHHHHHHH......',
+    '............H........................H..........',
+    '................................................',
+    '................................................',
+    '................................................',
+    '................................................',
+    '................................................',
+    '................................................',
+  ],
+  CLOCK: [
+    '........................................',
+    '....................H...................',
+    '..............HHHHHHHHHHHHH.............',
+    '............HHHHHHHHHHHHHHHHH...........',
+    '..........HHHHHHHHHHWHHHHHHHHHH.........',
+    '.........HHHHHHWWWWKKWWWWWHHHHHH........',
+    '........HHHHHWWWWWWKKWWWWWWWHHHHH.......',
+    '.......HHHHWKKWWWWWWWWWWWWKKWWHHHH......',
+    '......HHHHWWKKWWWWWWWWWWWWKKWWWHHHH.....',
+    '.....HHHHWWWWWWWWWWWWWWWWWWWWWWWHHHH....',
+    '....HHHHWWWWWWWWWWWWWWWWWWWWWWWWWHHHH...',
+    '....HHHWWWWWWWWWWWWWWWWWWWWWWWWWWWHHH...',
+    '...HHHHKKWWWWWWWWWWWWWWWWWWWWWWKKWHHHH..',
+    '...HHHWKKWWWWWWWWWWWWWWWWWWWWWWKKWWHHH..',
+    '..HHHHWWWWWWWWWWWWWWWWWWWWWWWWWWWWWHHHH.',
+    '..HHHWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWWWWWWWKKWWWWWWWWHHH.',
+    '..HHHKKWWWWWWWWWWWWKKKWKKKWWWWWWWKKWHHH.',
+    '.HHHWKKWWWWWWWWWWWWKKKKWWWWWWWWWWKKWWHHH',
+    '..HHHWWWWWWWWWWWWWWKKKWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWKWWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWKWWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWKWWWWWWWWWWWWWWWHHH.',
+    '..HHHWWWWWWWWWWWWWWWKWWWWWWWWWWWWWWWHHH.',
+    '..HHHHWKKWWWWWWWWWWKWWWWWWWWWWWKKWWHHHH.',
+    '...HHHWKKWWWWWWWWWWKWWWWWWWWWWWKKWWHHH..',
+    '...HHHHWWWWWWWWWWWWKWWWWWWWWWWWWWWHHHH..',
+    '....HHHWWWWWWWWWWWWKWWWWWWWWWWWWWWHHH...',
+    '....HHHHWWWWWWWWWWWKWWWWWWWWWWWWWHHHH...',
+    '.....HHHHWWWKKWWWWWKWWWWWWKKWWWWHHHH....',
+    '......HHHHWWKKWWWWWWWWWWWWKKWWWHHHH.....',
+    '.......HHHHWWWWWWWWKKWWWWWWWWWHHHH......',
+    '........HHHHHWWWWWWKKWWWWWWWHHHHH.......',
+    '.........HHHHHHWWWWWWWWWWWHHHHHH........',
+    '..........HHHHHHHHHHWHHHHHHHHHH.........',
+    '............HHHHHHHHHHHHHHHHH...........',
+    '..............HHHHHHHHHHHHH.............',
+    '....................H...................',
+  ],
+  PHOTOFIG: [
+    '..............H.............',
+    '............HHHHH...........',
+    '...........HHHHHHH..........',
+    '..........HHHHHHHHH.........',
+    '.........HHHHHHHHHHH........',
+    '.........HHWWHHWWHHH........',
+    '.........HHHKKKKHHHH........',
+    '.........HHHKKKKHHHH........',
+    '........HHHHHHHHHHHHH.......',
+    '.........HHHHHHHHHHH........',
+    '.........HHHHHHHHHHH........',
+    '.........HHHHHHHHHHH........',
+    '.........HHHHHHHHHHH........',
+    '..........HHHHhHHHH.........',
+    '.........hhhhhhhhhhh........',
+    '.......hhhhhhhhhhhhhhh......',
+    '......hhhhhhhhhhhhhhhhh.....',
+    '.....hhhhhhhhhhhhhhhhhhh....',
+    '....hhhhhhhhhhhhhhhhhhhhh...',
+    '....hhhhhhhhhhhhhhhhhhhhh...',
+    '....hhhhhhhhhhhhhhhhhhhhh...',
+    '...hhhhhhhhhhhhhhhhhhhhhhh..',
+    '....hhhhhhhhhhhhhhhhhhhhh...',
+    '....hhhhhhhhhhhhhhhhhhhhh...',
+    '....hhhhhhhhhhhhhhhhhhhhh...',
+    '....Hhhhhhhhhhhhhhhhhhhh....',
+    '....HHhhhhhhhhhhhhhhhhhH....',
+    '....HHHhhhhhhhhhhhhhhhHH....',
+    '....HHHHHhhhhhhhhhhhHHHH....',
+    '....HHHHHHHHHHhHHHHHHHHH....',
+    '....HHHHHHHHHHhHHHHHHHHH....',
+    '....HHHHHHHHHHhHHHHHHHHH....',
+    '....HHHHHHHHHHhHHHHHHHHH....',
+    '....HHHHHHHHHHhHHHHHHHHH....',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHhHHHHHHH......',
+    '......HHHHHHHHHHHHHHHH......',
+    '......HHHHHHHHHHHHHHHH......',
+    '......HHHHHHHHHHHHHHHH......',
+    '......HHHHHHHHHHHHHHHH......',
+    '......HHHHHHHHHHHHHHHH......',
+    '............................',
+  ],
+};
+
+  const SCARE_PALETTES = {
+    flesh:  {K:'#08080a', H:'#c8b49a', h:'#6b5a48', W:'#f4ece0'},
+    bone:   {K:'#08080a', H:'#b9ae9a', h:'#5e564a', W:'#efe7d6'},
+    rot:    {K:'#0a0708', H:'#9c8f7c', h:'#4d4336', W:'#c9b9a0'},
+    metal:  {K:'#08080a', H:'#c2ccc8', h:'#5b6a66', W:'#eef4f2'}
+  };
+
+  /* the table asks for figures by what they are in the story
+     ('glass', 'photo'); the grids are named by what they look like. */
+  const SCARE_FIGURE_GRID = {
+    glass:'GLASS_FACE', scream:'SCREAM', figure:'FIGURE',
+    hands:'HANDS',   clock:'CLOCK',     photo:'PHOTOFIG'
+  };
+  const SCARE_FIGURE_PALETTE = { glass:'flesh', scream:'bone', figure:'rot', hands:'flesh', clock:'metal', photo:'bone' };
+
+  function figureSVG(name){
+    const grid = SCARE_FIGURE_GRIDS[SCARE_FIGURE_GRID[name]];
+    if(!grid) return '';
+    const pal = SCARE_PALETTES[SCARE_FIGURE_PALETTE[name] || 'flesh'];
+    return svg(grid, pal, '#c8b49a');
+  }
+  return { iconHTML, playerSVG, freedSVG, freedCount, romanLabel:(i)=>ROMAN[i] || String(i+1), figureSVG };
+})();
 /* =========================================================
    GAME STATE
    ========================================================= */
@@ -1232,11 +2067,11 @@ const CLUE_DEFS = [
   {id:'phoneVoice', title:'A voice on the phone', text:"\u201cYou shouldn\u2019t still be awake.\u201d It offered no name."},
   {id:'bookshelfNote', title:'A note behind the books', text:"\u201cRule Three \u2014 never trust the third knock.\u201d"},
   {id:'usbLog', title:'A file from the USB drive', text:"\u201cThere were fourteen before you. Only one of them left.\u201d"},
-  {id:'windowReflection', title:'Something in the window', text:"For a moment the glass showed the room itself \u2014 14 pale ghosts are moving around the room \u2014 they seem trapped"},
-  {id:'elevenMessage', title:'A voice that isn\u2019t the Observer', text:"Another message, in a different rhythm than before: \u201cYou still think this is the first time you\u2019ve asked these questions.\u201d Signed, if you can call it that: ELEVEN."},
-  {id:'elevenWarning', title:'What Eleven remembers', text:"\u201cI stayed awake once, too. I remember pieces of thirteen nights before this one. If you want to remember more than that \u2014 don\u2019t leave through the door, and don\u2019t fall asleep.\u201d"},
-  {id:'usbTruth', title:'What the drive actually is', text:"\u201cThat isn\u2019t a drive. It\u2019s the other end of the line I\u2019m speaking through \u2014 a bleed port. It doesn\u2019t open a file. It opens a way out.\u201d The SUBJECT LOG was never a log. It was an index."},
-  {id:'theFourteen', title:'The index, and what it holds', text:"\u201cFourteen of us are in it. Not copies \u2014 the parts of us the room couldn\u2019t finish using. It renames you and keeps what it renamed you with. Take the index apart and we come out. All of us. Including me.\u201d"}
+  {id:'windowReflection', title:'Something in the window', text:"For a moment the glass showed the room itself \u2014 an empty desk, and someone standing where you stand now. You didn\u2019t count them then. You were never going to count them then. Later, you will know there were fourteen, and that you saw every one of them and understood none of it."},
+  {id:'elevenMessage', title:'A voice that isn\u2019t the Observer', text:"ELEVEN: \u201cI can\u2019t tell you how many times I\u2019ve heard you ask that. I stopped counting somewhere around the fourth, and I was still being polite about it then. You want to know whether you\u2019re the first. Nobody who asks is. That\u2019s the only honest thing I can give you tonight.\u201d"},
+  {id:'elevenWarning', title:'What Eleven remembers', text:"ELEVEN: \u201cStaying awake is the one thing it can\u2019t take back off you. You walk out still holding the night. I did it once, and it cost me thirteen others \u2014 I remember all of them, and not one of them remembers me. If you want more than that, don\u2019t take the door. Don\u2019t lie down.\u201d"},
+  {id:'usbTruth', title:'What the drive actually is', text:"ELEVEN: \u201cIt isn\u2019t a drive. It\u2019s the other end of the line I\u2019m talking through \u2014 a bleed port, and I\u2019m the pressure on it. The room hands these out like favours, one per subject, so that somebody eventually plugs one in and starts asking. I\u2019ve been the one asking since long before you sat down.\u201d The SUBJECT LOG was never a log. It was an index."},
+  {id:'theFourteen', title:'The index, and what it holds', text:"ELEVEN: \u201cFourteen of us are in there, and not one of us is a copy. We\u2019re the parts the room couldn\u2019t finish using. It renames you and then it keeps what it renamed you with, and that is the entire trick. Take the index apart and we come out. All of us \u2014 and understand that all is a number you have to say out loud, and that you get to say it wrong on purpose.\u201d"}
 ];
 const TOTAL_CLUES = CLUE_DEFS.length;
 
@@ -1257,7 +2092,8 @@ function freshState(){
       phoneResolved:false, phoneAskedWho:false, computerMsgSeen:false,
       windowSeen:false, exhaustedWarned:false,
       metEleven:false, elevenResolved:false,
-      usbPurgeReady:false, purgeConfirmed:false, freedFourteen:false
+      phoneRing2:false, secondRingResolved:false,
+      usbPurgeReady:false, purgeConfirmed:false, freedFourteen:false, leftEleven:false
     },
     journal: [],               // {cat, title, text, time}
     playerX: 300, playerY: 510, // wakes up right beside the bed
@@ -1331,13 +2167,27 @@ function checkTimeEvents(){
     document.getElementById('o-clock').classList.add('clock-stopped');
     addClue('clockStopped');
     addJournal('Important Events','The clock stops', 'At the stroke of midnight, the clock stops. The hands never move again.', S.time);
-    jumpscare(true);
+    jumpscare('clock');
     MusicSys.stopTick();
     setObjective("It's midnight. Something is different now.");
   }
   if(S.time >= 24*60+17 && S.knockCount < 1 && !S.doorOpened){
     S.knockCount = 1;
     knockEvent(1);
+  }
+  if(S.time >= 24*60+20 && !firedEvents.phoneRing2 && !S.flags.secondRingResolved){
+    // The desk note's warning, paid off. 11:43 was the first ring; this is
+    // the one the note told you not to pick up. Deliberately NOT gated on
+    // S.flags.phoneResolved: someone who walked past the phone at 11:43
+    // without touching it must still hear it ring again, and ringing twice
+    // is the whole point of the note.
+    firedEvents.phoneRing2 = true;
+    S.flags.phoneRing2 = true;
+    addJournal('Important Events','The telephone rings again', 'After midnight, the telephone starts up a second time. The note on the desk said not to answer it this late.', S.time);
+    toast("The telephone is ringing again.");
+    AudioSys.ring();
+    document.getElementById('o-phone').classList.add('active-glow');
+    setObjective("It rang again. The note said not to answer.");
   }
   if(S.time >= 24*60+34 && S.knockCount < 2 && !S.doorOpened){
     S.knockCount = 2;
@@ -1350,8 +2200,9 @@ function checkTimeEvents(){
 }
 function knockEvent(n){
   toast(n===1 ? "Someone knocks at the door." : n===2 ? "The knock comes again." : "A third knock. Slower this time.");
-  AudioSys.knock();
-  if(n===3){ jumpscare(true); } else { flashShake(false); }
+  // knocks one and two use the 'distant' sting, which is its own two-hit
+  // sound — playing AudioSys.knock() alongside it would double them
+  jumpscare(n===3 ? 'knock' : 'distant');
   document.getElementById('o-door').classList.add('active-glow');
   addJournal('Important Events', `Knock #${n}`, n===3 ? "A third knock at the door \u2014 slower, deliberate." : `Someone knocks at the door (knock ${n}).`, S.time);
   setObjective("Someone is at the door.");
@@ -1398,30 +2249,76 @@ function shakeScreen(){
   room.classList.remove('screenshake'); void room.offsetWidth;
   room.classList.add('screenshake');
 }
-/* full jumpscare — screen flash + hard shake + a dissonant stinger.
-   Used sparingly, on the night's handful of worst moments. */
-function jumpscare(strong){
+/* Scares, one per beat. `kind` picks the colour, the shake and the sting
+   together, because in this game the scare should always be telling you
+   about the thing that just happened rather than just being loud.
+   Both the old 'active'/'strong' classes are cleared on every call so a
+   rapid second scare can never inherit the previous one's animation. */
+/* One character per beat. `fig` is the actual image — a colour wash on
+   its own is just light, and light is not the reason anyone stops playing.
+   `motion` is how that image moves, because a face and a door do not
+   arrive the same way. */
+ const SCARES = {
+  clock:       {flash:'sc-clock',       shake:'shake-freeze', sound:true, fig:'clock',   motion:'sf-turn',   tint:'steel'},
+  knock:       {flash:'sc-knock',       shake:'shake-triple', sound:true, fig:'hands',   motion:'sf-grab',   tint:'blood'},
+  distant:     {flash:'sc-distant',     shake:'shake-door',   sound:true, fig:'figure',  motion:'sf-slam',   tint:'rot'},
+  photo:       {flash:'sc-photo',       shake:'shake-shutter',sound:true, fig:'photo',   motion:'sf-press',  tint:'static'},
+  window:      {flash:'sc-window',      shake:'shake-twitch', sound:true, fig:'glass',   motion:'sf-lunge',  tint:'cold'},
+  purge:       {flash:'sc-purge',       shake:'shake-bloom',  sound:true, fig:'scream',  motion:'sf-swarm',  tint:'red'},
+  'purge-hold':{flash:'sc-purge-hold',  shake:'shake-bloom',  sound:true, fig:'scream',  motion:'sf-swarm',  tint:'red'},
+  door:        {flash:'sc-door',        shake:'shake-strong', sound:true, fig:'scream',  motion:'sf-lunge',  tint:'blood'}
+};
+function applyScare(kind, silent){
+  const s = SCARES[kind] || SCARES.door;
   const room = document.getElementById('room');
   const flash = document.getElementById('scareFlash');
+  const figEl = document.getElementById('scareFigure');
   if(!room || !flash) return;
-  flash.classList.remove('active','strong'); void flash.offsetWidth;
-  flash.classList.add('active');
-  if(strong) flash.classList.add('strong');
-  room.classList.remove('screenshake','screenshake-strong'); void room.offsetWidth;
-  room.classList.add(strong ? 'screenshake-strong' : 'screenshake');
-  AudioSys.scare(strong);
+  // the figure goes first and is torn down unconditionally, so a scare that
+  // somehow has no image for it still cannot leave the last one on screen
+  if(figEl){
+    figEl.className = 'scare-figure';
+    figEl.removeAttribute('data-tint');
+    figEl.removeAttribute('data-fig');
+    figEl.innerHTML = '';
+    const src = s.fig ? PixelArt.figureSVG(s.fig) : '';
+    if(src){
+      const slot = document.createElement('div');
+      slot.className = 'sf-slot';
+      slot.innerHTML = src;
+      figEl.appendChild(slot);
+      if(s.motion) figEl.classList.add(s.motion);
+      figEl.setAttribute('data-tint', s.tint || 'red');
+      figEl.setAttribute('data-fig', s.fig);
+      void figEl.offsetWidth;
+      figEl.classList.add('active');
+    }
+  }
+  flash.className = 'scare-flash';
+  void flash.offsetWidth;
+  flash.classList.add('active', s.flash);
+  // clear every shake any variant can set, derived from the table rather
+  // than hand-listed, so a new variant can't be added and then strand its
+  // own shake on the room when the next scare fires
+  const allShakes = ['screenshake','screenshake-strong']
+    .concat(Object.values(SCARES).map(v=>v.shake))
+    .filter(Boolean);
+  room.className = room.className
+    .replace(new RegExp('\\b(' + allShakes.join('|') + ')\\b','g'), '')
+    .replace(/\s{2,}/g,' ')
+    .trim();
+  void room.offsetWidth;
+  if(s.shake) room.classList.add(s.shake);
+  if(!silent && s.sound) AudioSys.scare(kind);
 }
-/* visual-only flash+shake, no stinger — for beats that already have
-   their own distinct sound cue (e.g. the knock itself) */
-function flashShake(strong){
-  const room = document.getElementById('room');
-  const flash = document.getElementById('scareFlash');
-  if(!room || !flash) return;
-  flash.classList.remove('active','strong'); void flash.offsetWidth;
-  flash.classList.add('active');
-  if(strong) flash.classList.add('strong');
-  room.classList.remove('screenshake','screenshake-strong'); void room.offsetWidth;
-  room.classList.add(strong ? 'screenshake-strong' : 'screenshake');
+/* full scare — flash + shake + sting, on the night's worst moments */
+function jumpscare(kind){
+  applyScare(kind || 'door', false);
+}
+/* visual-only, for a beat that already has its own distinct sound cue
+   (e.g. the knock itself, which is played separately) */
+function flashShake(kind, silent){
+  applyScare(kind || 'distant', silent === undefined ? true : silent);
 }
 function setObjective(text){
   document.getElementById('objective').textContent = text;
@@ -1696,7 +2593,7 @@ function interactDesk(){
     S.flags.foundPhotograph = true;
     addClue('photograph');
     addItem('photo','Photograph','photograph',"A photograph of this exact room. The clock reads 3:07. Someone sits at the desk \u2014 you can't quite see their face.");
-    jumpscare(false);
+      jumpscare('photo');
     showSimple('The Desk Drawer', "Underneath the note you find a photograph, face down. It's this room \u2014 but the clock in it reads a time that hasn't happened yet, and someone is sitting where you usually stand.", 6, -3);
   } else {
     showSimple('The Desk', "The desk holds nothing more. Just the lamp, and the quiet.", 2, -1);
@@ -1793,12 +2690,20 @@ function openPasswordPrompt(){
    option to end the whole system is a thing you learn about, never one
    that's simply there. */
 function openPurgePrompt(){
+  // The command is one line and it is not a menu. The only choice in this
+  // moment is the number you say out loud: fourteen, or thirteen. Thirteen
+  // leaves XI inside, and that option only presents itself to a player who
+  // spent the night doubting the voice on the other end of the drive.
+  const mayLeaveOne = S.suspicion >= 2;
   const body = `
     <p>The drive is still in the port. Underneath everything Eleven said, a line you hadn't noticed before is sitting open and waiting.</p>
     <p><span style="color:var(--lamp);font-family:var(--pf-display);font-size:.72rem;">PURGE &nbsp;--subject-index --no-archive --confirm</span></p>
     <p>It would take the index apart. Every name in it, every night it remembers, and everything still being held inside it \u2014 out into the dark, where none of it can be filed again.</p>
     <p>There is no copy. There is no archive. Whatever is in there comes out, and after tonight the room cannot call anyone back to this desk.</p>
     <p style="color:var(--ink-dim);font-style:italic;">To confirm, type the number of those being held.</p>
+    ${mayLeaveOne
+      ? `<p style="color:var(--ink-dim);font-style:italic;">It will also take one. If you leave a name in the index, type one less \u2014 and be certain that is the name you mean, because it will keep it, and it has kept names longer than you have been awake.</p>`
+      : ''}
     <div class="pw-row">
       <input id="purgeInput" maxlength="3" inputmode="numeric" placeholder="00" autocomplete="off">
       <button id="purgeSubmit" class="primary">Run it</button>
@@ -1811,21 +2716,32 @@ function openPurgePrompt(){
   const feedback = document.getElementById('purgeFeedback');
   function attempt(){
     const val = ((input.value||'').trim().replace(/^0+/,'')) || '0';
-    if(val === '14'){
+    // 14 frees everyone including XI. 13 keeps one inside, and the index
+    // decides which one \u2014 there is only ever one name it files twice.
+    const leavesOne = (val === '13' && mayLeaveOne);
+    if(val === '14' || leavesOne){
       S.flags.purgeConfirmed = true;
-      S.flags.freedFourteen = true;
+      S.flags.leftEleven = leavesOne;
+      S.flags.freedFourteen = !leavesOne;
       S.decisions += 1;
+      if(leavesOne) S.suspicion += 2;
       input.disabled = true; submit.disabled = true;
-      addJournal('Messages','The purge runs','"PURGE --subject-index --no-archive --confirm". No progress. No output. No confirmation either.', S.time);
-      setObjective('The room is coming apart.');
+      addJournal('Messages','The purge runs',
+        leavesOne
+          ? '"PURGE --subject-index --no-archive --confirm 13". Thirteen names go out. One does not. No progress. No output. No confirmation either.'
+          : '"PURGE --subject-index --no-archive --confirm 14". No progress. No output. No confirmation either.',
+        S.time);
+      setObjective(leavesOne ? 'Something stayed behind.' : 'The room is coming apart.');
       closeTopModal();
-      MusicSys.stopTick();
-      jumpscare(true);
-      setTimeout(()=>resolveEnding('purge'), 1500);
+        MusicSys.stopTick();
+        jumpscare(leavesOne ? 'purge-hold' : 'purge');
+        setTimeout(()=>resolveEnding('purge'), 1500);
     } else {
-      feedback.textContent = (val === '15' || val === '13')
-        ? 'The cursor does not blink. It is not counting you. It has never been counting you.'
-        : 'Not that number. Count them again \u2014 it names you, but it files the others.';
+      feedback.textContent = (val === '13')
+        ? 'The cursor stops. Thirteen is not a number the index knows by accident \u2014 it is only correct if you mean to leave a name inside, and you have not earned the right to choose one.'
+        : (val === '15'
+          ? 'The cursor does not blink. It is not counting you. It has never been counting you.'
+          : 'Not that number. Count them again \u2014 it names you, but it files the others.');
       AudioSys.denied();
     }
   }
@@ -1834,6 +2750,12 @@ function openPurgePrompt(){
 }
 
 function interactPhone(){
+  // the second ring supersedes the first — same telephone, later hour
+  if(S.flags.phoneRing2 && !S.flags.secondRingResolved){
+    document.getElementById('o-phone').classList.remove('active-glow');
+    runDialogue('phone_second');
+    return;
+  }
   const rang = S.time >= 23*60+43;
   if(!rang){
     showSimple('The Telephone', "The receiver sits in its cradle, silent.", 1, 0);
@@ -1893,6 +2815,43 @@ const PHONE_TREE = {
     speaker:null,
     text:"The ringing stops on its own. The silence that follows feels heavier than the ringing did.",
     onEnter:()=>{ S.flags.phoneResolved=true; S.suspicion+=2; },
+    choices:[{label:'Continue', next:null}]
+  },
+  /* the second ring, after midnight. The desk note warned about exactly
+     this, and the warning was not about the ringing — it was about who
+     picks up. Answering tells the room you're still willing to be
+     spoken to; refusing it is the only clean refusal available tonight. */
+  phone_second:{
+    speaker:null,
+    text:"The telephone is ringing again, and it sounds different. The first ring was something asking. This one sounds like something checking.",
+    onEnter:()=>{ addJournal('Important Events','The second ring', 'The telephone rings after midnight. It doesn\u2019t sound like a call. It sounds like a check.', S.time); },
+    choices:[
+      {label:'Answer it', next:'phone_second_answer'},
+      {label:'Let it ring', next:'phone_second_ignore'}
+    ]
+  },
+  phone_second_answer:{
+    speaker:'Voice',
+    text:"“Fifteen.” A pause with something in it. “You should have left that one where it was. Ask it what it is keeping, and see how fast it stops offering.” The line does not go dead. It simply stops being a call.",
+    onEnter:()=>{
+      S.suspicion += 2;
+      addJournal('Messages','The voice, after midnight','“Fifteen. You should have left that one where it was. Ask it what it is keeping, and see how fast it stops offering.”', S.time);
+    },
+    choices:[{label:'Hang up', next:'phone_second_hangup'}]
+  },
+  phone_second_ignore:{
+    speaker:null,
+    text:"You stand in the middle of the room and let it ring until it gives up. It takes a long time. When it finally stops, the room is quieter than it was before it started, and the note on the desk turns out to have been worth reading.",
+    onEnter:()=>{
+      S.trust += 1;
+      addJournal('Important Events','You let it ring','The second ring went unanswered. The note on the desk was right about something.', S.time);
+    },
+    choices:[{label:'Continue', next:'phone_second_hangup'}]
+  },
+  phone_second_hangup:{
+    speaker:null,
+    text:"The receiver settles into its cradle. Whatever the second ring wanted to establish, it didn't get it.",
+    onEnter:()=>{ S.flags.secondRingResolved = true; S.flags.phoneRing2 = false; },
     choices:[{label:'Continue', next:null}]
   }
 };
@@ -1958,6 +2917,20 @@ const ELEVEN_TREE = {
       S.flags.usbPurgeReady = true;
       addJournal('Messages','Eleven, on the index','"Fourteen of us are in it. Take the index apart and we come out. All of us. Including me \u2014 I\u2019ve been in here since before you sat down."', S.time);
     },
+    choices:()=>[
+      // The last thing he says before the command exists. A player who spent
+      // the night answering the phone, or who asked him who he was, gets one
+      // more line; a player who only listened and watched does not. This is
+      // the only place trust changes what Eleven is willing to say.
+      S.trust > S.suspicion
+        ? {label:'Tell him you believe him', next:'eleven_trust'}
+        : {label:'Say nothing', next:'eleven_leave'}
+    ]
+  },
+  eleven_trust:{
+    speaker:'Eleven',
+    text:"\u201cThen say the number out loud, and don\u2019t take it back halfway. That is the only part I am actually afraid of \u2014 not the command. Someone who means it halfway. I have watched that happen fourteen times and it is worse than the room, because at least the room is honest about what it is.\u201d",
+    onEnter:()=>{ S.trust += 1; addJournal('Messages','Eleven, on saying it out loud','"That is the only part I am actually afraid of \u2014 not the command. Someone who means it halfway."', S.time); },
     choices:()=>[{label:'Say nothing', next:'eleven_leave'}]
   },
   eleven_leave:{
@@ -2006,8 +2979,8 @@ function interactWindow(){
   else {
     if(!S.flags.windowSeen){
       S.flags.windowSeen = true;
-      addClue('windowReflection');
-      jumpscare(true);
+        addClue('windowReflection');
+        jumpscare('window');
     }
     text = "For a moment the glass shows the room itself \u2014 an empty desk, and someone standing where you stand now. Then it's just the window again.";
   }
@@ -2072,7 +3045,7 @@ function interactDoor(){
       S.decisions += 1;
       S.doorOpened = true;
       closeTopModal();
-      jumpscare(true);
+      jumpscare('door');
       advanceTime(4);
       setTimeout(()=>resolveEnding('door', knockNum), 350);
     }},
@@ -2248,6 +3221,10 @@ const ENDINGS = {
   THE_RELEASE:{
     title:'THE RELEASE',
     desc:"Fourteen of them come out of the dark at once. None of them move like a person leaving a room; they move like a sentence losing its subject. They are quiet a long time. Speech is the first thing they have to learn again.\n\nThe clock, which has not moved in fourteen nights, moves. Not forward. Out. You are still Fifteen \u2014 but there is no sixteen now, and nobody is coming.\n\nFourteen names go out into the night, and nothing comes to get them. That is the whole of it."
+  },
+  THE_THIRTEEN:{
+    title:'THE THIRTEEN',
+    desc:"Thirteen of them come out. The number is correct \u2014 you counted, and you were right about the count, which is the part nobody warns you about.\n\nThey wait for the fourteenth. He does not arrive. Somewhere behind the desk, something patient finishes what it started, and the cursor on the screen keeps its shape for a moment longer than it should, as though holding a place in a sentence.\n\nYou got them out. Almost all of them. You are still Fifteen, and the room is still a room, and somewhere in the index one name is still being held by a machine that has never once been asked to give anything back."
   }
 };
 
@@ -2256,7 +3233,9 @@ function resolveEnding(trigger, knockNum){
   const cc = clueCount();
   let name;
   if(trigger === 'purge'){
-    name = 'THE_RELEASE';
+    // 14 freed everyone; 13 kept one name inside the index. The choice was
+    // made in the number typed at the prompt, not chosen here.
+    name = S.flags.leftEleven ? 'THE_THIRTEEN' : 'THE_RELEASE';
   } else if(trigger === 'door'){
     if(knockNum === 3){
       name = 'THE_DOOR';
@@ -2283,7 +3262,21 @@ function showEndingScreen(name){
   document.getElementById('endDesc').textContent = e.desc;
   document.getElementById('endClues').textContent = clueCount()+' / '+TOTAL_CLUES;
   document.getElementById('endDecisions').textContent = String(S.decisions);
-  showReleased(name === 'THE_RELEASE');
+  // the two hidden counters, given a name at the end instead of nothing.
+  // Both can legitimately be 0 (a player who only read and never chose),
+  // so the copy has to mean something at every value.
+  const trustEl = document.getElementById('endTrust');
+  if(trustEl){
+    const net = S.trust - S.suspicion;
+    let verdict;
+    if(net >= 2) verdict = 'you let them speak';
+    else if(net === 1) verdict = 'you mostly listened';
+    else if(net === 0) verdict = 'you gave nothing either way';
+    else if(net === -1) verdict = 'you mostly doubted';
+    else verdict = 'you stopped believing';
+    trustEl.textContent = verdict;
+  }
+  showReleased(name === 'THE_RELEASE' ? 'all' : name === 'THE_THIRTEEN' ? 'thirteen' : null);
   showScreen('endingScreen');
   MusicSys.playEndingTheme(name);
 }
@@ -2291,29 +3284,36 @@ function showEndingScreen(name){
 /* the fourteen only exist in this one ending — everyone else leaves a
    screen without them. Built fresh each time so the reveal animation
    replays whenever THE_RELEASE is shown again. */
-function showReleased(on){
+function showReleased(mode){
   const wrap = document.getElementById('freedWrap');
   const row = document.getElementById('freedRow');
   const wake = document.getElementById('freedWake');
-  if(!on){
+  if(!mode){
     wrap.classList.add('hidden');
     row.innerHTML = '';
     wake.textContent = '';
     return;
   }
+  // in THE_THIRTEEN, XI is still inside the index. He renders held rather
+  // than absent: a missing figure reads as a counting error, a dimmed one
+  // reads as a decision, which is what it was.
+  const leftBehind = (mode === 'thirteen');
   row.innerHTML = '';
   for(let i=0;i<PixelArt.freedCount;i++){
     const cell = document.createElement('div');
     // XI is Eleven — the one who got deep enough to be filed instead of
     // reset, and the only one the index was ever called by name
-    if(i === 10) cell.className = 'freed known';
-    else cell.className = 'freed';
+    const held = leftBehind && i === 10;
+    cell.className = 'freed' + (i === 10 ? ' known' : '') + (held ? ' held' : '');
     cell.style.animationDelay = (0.5 + i*0.105).toFixed(3)+'s';
     const name = (i === 10) ? 'ELEVEN' : PixelArt.romanLabel(i);
     cell.innerHTML = PixelArt.freedSVG(i) + `<span class="freed-name">${name}</span>`;
+    if(held) cell.setAttribute('aria-label', 'Eleven, still held');
     row.appendChild(cell);
   }
-  wake.textContent = 'Nothing is written down twice.';
+  wake.textContent = leftBehind
+    ? 'Thirteen names go out into the night. Nothing comes to get them. One name does not go anywhere.'
+    : 'Nothing is written down twice.';
   wrap.classList.remove('hidden');
 }
 

@@ -671,7 +671,144 @@
   }
   .back-row{ margin-top:2em; }
 
-  /* ---------- Game screen ---------- */
+  /* ---------- LAZY? — the spoiler terminal ----------
+     A phosphor screen, not a menu. Green on near-black, scanlines, a slow
+     flicker, and pixel type. Output arrives one character at a time the
+     way a dump does, and once it is done the prompt opens and the player
+     can talk to it. It is deliberately the only place in the game that
+     speaks in this voice: the room never explains itself anywhere else. */
+  .lazy-btn{ font-size:.82em; opacity:.55; letter-spacing:.16em; }
+  .lazy-btn:hover{ opacity:1; }
+  .lazy-screen{
+    background:#030604;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.4) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at 50% 42%, #08110b 0%, #010302 78%);
+  }
+  .term{
+    --t-bg:#040806;
+    --t-bar:#08110b;
+    --t-line:#173425;
+    --t-text:#79dd9b;
+    --t-dim:#3d7550;
+    --t-name:#cbf7d8;
+    --t-key:#e8b96a;
+    --t-err:#e07a6a;
+    position:relative;
+    width:min(780px, 92vw);
+    height:min(72vh, 640px);
+    height:min(72dvh, 640px);
+    display:flex; flex-direction:column;
+    text-align:left;
+    background:var(--t-bg);
+    border:1px solid var(--t-line);
+    box-shadow:
+      0 0 0 1px #000,
+      0 0 44px rgba(60,255,140,.06),
+      inset 0 0 70px rgba(0,0,0,.75);
+    font-family:var(--pf-body);
+    animation: termFlicker 7s steps(1) infinite;
+  }
+  /* scanlines laid over the glass, above the text but never in the way of it */
+  .term::after{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px);
+  }
+  @keyframes termFlicker{
+    0%,95%{ opacity:1; }
+    96%{ opacity:.78; }
+    97%{ opacity:1; }
+    98.5%{ opacity:.88; }
+    100%{ opacity:1; }
+  }
+  .term ::selection{ background:#1c4a2f; color:#eafff1; }
+  .term-bar{
+    flex:none;
+    display:flex; align-items:center; gap:.45em;
+    padding:.55em .8em;
+    background:var(--t-bar);
+    border-bottom:1px solid var(--t-line);
+    font-family:var(--pf-display); font-size:.58rem; color:#4b8c60;
+  }
+  .term-dot{ width:.5em; height:.5em; background:var(--t-line); }
+  .term-title{ margin-left:.7em; letter-spacing:.06em; }
+  .term-mode{ margin-left:auto; color:var(--t-dim); letter-spacing:.06em; }
+
+  .term-out{
+    flex:1; min-height:0; overflow-y:auto;
+    margin:0; padding:1em 1.15em .6em;
+    font-family:var(--pf-body); font-size:1.12rem; line-height:1.4;
+    color:var(--t-text);
+    text-shadow:0 0 7px rgba(80,255,150,.32);
+    scrollbar-width:thin; scrollbar-color:var(--t-line) transparent;
+  }
+  .term-out::-webkit-scrollbar{ width:8px; }
+  .term-out::-webkit-scrollbar-thumb{ background:var(--t-line); }
+  .tl{ white-space:pre-wrap; word-break:break-word; min-height:1.4em; }
+  .tl-dim{ color:var(--t-dim); }
+  .tl-name{ color:var(--t-name); text-shadow:0 0 11px rgba(120,255,170,.5); }
+  .tl-req{ color:var(--t-key); text-shadow:0 0 8px rgba(232,185,106,.3); }
+  .tl-ok{ color:var(--t-text); }
+  .tl-err{ color:var(--t-err); text-shadow:0 0 7px rgba(224,122,106,.3); }
+  .tl-known{ color:var(--t-key); text-shadow:0 0 9px rgba(232,185,106,.4); }
+  .tl-cmd{ color:var(--t-name); }
+  .tl-prompt{ color:var(--t-text); }
+  /* label + value lines wrap under the value, not under the label */
+  .tl-hang{ padding-left:12ch; text-indent:-12ch; }
+  .tl.typing::after{
+    content:''; display:inline-block;
+    width:.55em; height:1.02em; margin-left:2px;
+    background:var(--t-text);
+    vertical-align:-.16em;
+    animation: termBlink 1.05s steps(1) infinite;
+  }
+  @keyframes termBlink{ 0%,50%{ opacity:1; } 51%,100%{ opacity:0; } }
+
+  .term-chips{
+    flex:none; display:flex; gap:.5em;
+    padding:.6em 1.15em 0;
+    background:var(--t-bg);
+  }
+  .term-chip{
+    font-family:var(--pf-display); font-size:.5rem; letter-spacing:.04em;
+    padding:.7em .9em;
+    background:transparent; color:var(--t-dim);
+    box-shadow: inset 0 0 0 1px var(--t-line);
+  }
+  .term-chip:hover{ background:#0b1a11; color:var(--t-name); }
+  .term-chip:active{ box-shadow: inset 0 0 0 1px var(--t-line); }
+  .term-chip:disabled{ opacity:.3; }
+
+  .term-input-row{
+    flex:none; display:flex; align-items:center; gap:.6em;
+    padding:.6em 1.15em .75em;
+    background:var(--t-bg);
+    font-family:var(--pf-body); font-size:1.12rem;
+  }
+  .term-prompt{
+    color:var(--t-text); white-space:nowrap;
+    text-shadow:0 0 7px rgba(80,255,150,.32);
+  }
+  .term-prompt b{ color:var(--t-dim); font-weight:400; }
+  .term-input{
+    flex:1; min-width:0;
+    background:transparent; border:0; outline:0; box-shadow:none;
+    color:var(--t-name); font:inherit; padding:0;
+    text-shadow:0 0 7px rgba(120,255,170,.4);
+    caret-color:var(--t-text);
+  }
+  .term-input:disabled{ opacity:.3; }
+
+  @media (max-width: 560px){
+    .term{ height:min(66vh, 560px); height:min(66dvh, 560px); }
+    .term-out, .term-input-row{ font-size:1rem; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .term{ animation:none; }
+    .tl.typing::after{ animation:none; }
+  }
+
+    /* ---------- Game screen ---------- */
   #gameScreen{ position:absolute; inset:0; }
 
   #hud{
@@ -1035,6 +1172,7 @@
       <button id="btnNewGame" class="primary">New Game</button>
       <button id="btnContinue" disabled>Continue</button>
       <button id="btnHowTo">How To Play</button>
+      <button id="btnLazy" class="lazy-btn">lazy?</button>
     </div>
   </div>
 
@@ -1056,6 +1194,30 @@
       <p>Press <kbd>ESC</kbd> at any time to pause.</p>
     </div>
     <div class="back-row"><button id="btnHowToBack">Back</button></div>
+  </div>
+
+  <!-- LAZY? — the spoiler terminal. every ending, how it is reached, and
+       what it actually says. sits off the main menu on purpose: nobody
+       should walk into this by accident. -->
+  <div id="lazyScreen" class="screen hidden lazy-screen">
+    <div class="term" role="region" aria-label="Subject index console">
+      <div class="term-bar">
+        <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+        <span class="term-title">SUBJECT_INDEX \ ENDINGS.DUMP</span>
+        <span class="term-mode">read-only</span>
+      </div>
+      <div id="termOut" class="term-out" role="log" aria-live="polite" aria-busy="true"></div>
+      <div class="term-chips" id="termChips">
+        <button class="term-chip" data-cmd="ls" disabled>ls</button>
+        <button class="term-chip" data-cmd="help" disabled>help</button>
+        <button class="term-chip" data-cmd="clear" disabled>clear</button>
+      </div>
+      <div class="term-input-row">
+        <span class="term-prompt" id="termPrompt">fifteen<b>@</b>index<b>:~$</b></span>
+        <input id="termInput" class="term-input" type="text" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Console command" disabled>
+      </div>
+    </div>
+    <div class="back-row"><button id="btnLazyBack">Back</button></div>
   </div>
 
   <!-- COLD OPEN — a typed, title-card style intro before the night begins -->
@@ -1229,8 +1391,52 @@ const AudioSys = (function(){
       osc.stop(now+dur+0.02);
     }catch(e){ /* audio unavailable — game remains fully playable */ }
   }
+  /* ---- console sounds ------------------------------------------------
+     A key click is a burst of band-passed noise, not a pitched beep, so it
+     sounds like a keyswitch instead of a buzzer. Pitch and sweep vary per
+     hit so a run of them does not machine-gun. */
+  let noiseBuf = null;
+  function noise(c){
+    if(noiseBuf && noiseBuf.sampleRate === c.sampleRate) return noiseBuf;
+    const len = Math.floor(c.sampleRate * 0.06);
+    noiseBuf = c.createBuffer(1, len, c.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i] = Math.random()*2 - 1;
+    return noiseBuf;
+  }
+  function tick(freq, dur, gain, q, sweepTo){
+    try{
+      const c = getAudioCtx();
+      if(!c) return;
+      if(c.state === 'suspended') c.resume();
+      const src = c.createBufferSource();
+      src.buffer = noise(c);
+      const f = c.createBiquadFilter();
+      f.type = 'bandpass';
+      f.Q.value = q || 1.1;
+      const now = c.currentTime;
+      f.frequency.setValueAtTime(freq, now);
+      if(sweepTo) f.frequency.exponentialRampToValueAtTime(sweepTo, now + dur);
+      const g = c.createGain();
+      g.gain.setValueAtTime(gain, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      src.connect(f); f.connect(g); g.connect(c.destination);
+      src.start(now);
+      src.stop(now + dur + 0.02);
+    }catch(e){ /* audio unavailable — the console stays fully usable */ }
+  }
   return {
     click(){ beep(320,0.06,'sine',0.04); },
+    termKey(){ tick(2100 + Math.random()*1300, 0.022, 0.05, 1.3, 900); beep(150 + Math.random()*30, 0.03, 'sine', 0.012); },
+    termEnter(){ tick(1500, 0.045, 0.07, 0.9, 600); beep(110, 0.07, 'triangle', 0.03); },
+    termOk(){ beep(660, 0.07, 'sine', 0.03); setTimeout(()=>beep(880, 0.09, 'sine', 0.03), 70); },
+    termErr(){ beep(170, 0.1, 'square', 0.028); setTimeout(()=>beep(140, 0.12, 'square', 0.028), 90); },
+    /* a knock on wood, not a beep: low body plus a short noise strike. The
+       third one (slow=true) is lower and longer, matching "slower this time". */
+    termKnock(slow){
+      if(slow){ tick(150, 0.16, 0.22, 0.7, 45); beep(58, 0.24, 'sine', 0.14); }
+      else    { tick(210, 0.09, 0.17, 0.8, 80); beep(82, 0.13, 'sine', 0.10); }
+    },
     // Per-character blip for the cold open's typed title cards. It fires up to
     // 31 times a second, so it has to be tiny and short — anything heavier
     // turns the intro into a buzzsaw. Pitch wanders a little per character so
@@ -2417,6 +2623,7 @@ function applyMoveKey(e, down){
 
 function setupInput(){
   window.addEventListener('keydown', (e)=>{
+    if(terminalActive) return;   // the console owns the keyboard
     if(modalOpen){
       if(e.key==='Escape') closeTopModal();
       return;
@@ -3228,6 +3435,391 @@ const ENDINGS = {
   }
 };
 
+/* =========================================================
+   LAZY? — the console behind the menu button.
+
+   Two halves. First it prints the endings dump one character at a time,
+   the way something reading a file back would. Then the prompt opens and
+   the player can talk to it: `ls` lists the fourteen held in the index.
+
+   Every condition in ENDING_GUIDE mirrors a branch in resolveEnding() or
+   in the flags that feed it: 7 and 6 clues for the sleep and door splits,
+   12 for the Keeper, 14 at the purge prompt, suspicion 2 for leaving one
+   behind — and metEleven, which is only set when Eleven is asked what to
+   do, and which the purge prompt will not open without. If a condition
+   changes, change it here too or the console starts lying.
+   ========================================================= */
+const ENDING_GUIDE = [
+  {
+    name:'THE_LOOP',
+    need:'Lie down, or let 1:00 AM arrive, holding fewer than 7 of the 14 clues.',
+    mean:'Nothing was understood, so nothing changes. The clock goes back to 11:00 PM, the note is on the desk unread, and the telephone has already started. The room never needed you to understand it. It only needed you to still be in it by morning.'
+  },
+  {
+    name:'THE_TRUTH',
+    need:'Lie down, or let 1:00 AM arrive, holding 7 or more clues. (Waiting out the clock with 12+ clues and Eleven\u2019s advice heard gives THE_KEEPER instead.)',
+    mean:'You learn the shape of it: the room resets every night, and you are not the first it has asked to sit at this desk. Knowing that changes nothing about where you are standing. Understanding was never what it took from you. It took the night.'
+  },
+  {
+    name:'THE_DOOR',
+    need:'Open the door on the third knock (12:50 AM), or open it earlier while missing any of: 6+ clues, the password entered, the USB drive read.',
+    mean:'Whatever is on the other side matches nothing you found tonight: not the note, not the file, not the voice on the phone. The index holds no record of it. The door closes softly behind you either way.'
+  },
+  {
+    name:'ESCAPE',
+    need:'Open the door after the first or second knock and before the third (12:50 AM), holding 6+ clues, with the password 071943 entered and the USB drive read.',
+    mean:'Cold air, and it is real. The desk, the lamp and the clock stopped at midnight all stay where you left them, and you do not check. It is the only ending in which you simply walk out. Eleven advised against this door: if you want to keep more of the night than he did, do not take it. The index does not record what you carry out.'
+  },
+  {
+    name:'THE_KEEPER',
+    secret:true,
+    need:'Reach Eleven at the computer (password, then the USB drive) and ask him what to do. Hold 12 or more clues and let 1:00 AM arrive on its own. Never lie down. Never open the door.',
+    mean:'You refused the loop while awake and remembering, so nothing resets. Something behind the walls has to account for a variable it has not had to account for before. You are still Fifteen, but the first one who remembers choosing this. Whoever sits down after you gets a sixteenth clue to find.'
+  },
+  {
+    name:'THE_RELEASE',
+    secret:true,
+    need:'Take the key from under the bed, open the cabinet for the USB drive, unlock the computer with 071943 and read the drive, holding 6+ clues. Then ask Eleven what to do, what the drive really is, and who is in it. Run PURGE and confirm with 14.',
+    mean:'All fourteen come out at once, and not one of them moves like a person leaving a room. Speech is the first thing they have to learn again. The clock, unmoved for fourteen nights, moves. Not forward. Out. You are still Fifteen, but there is no sixteen now, and nobody is coming to be one. Nothing is written down twice.'
+  },
+  {
+    name:'THE_THIRTEEN',
+    secret:true,
+    need:'The same path as THE_RELEASE, but confirm with 13. The index only accepts thirteen from someone who has doubted the voice: let the first ring go unanswered, or pick up the second. Any other way, it refuses 13.',
+    mean:'Thirteen names go out and one does not. You counted correctly, which is the part nobody warns you about. They wait for the fourteenth, and ELEVEN does not arrive: the index keeps him, and the cursor holds its place where his name was. The room is still a room, and one name is still held by a machine that has never once been asked to give anything back.'
+  }
+];
+
+/* The fourteen held in the index, in filing order. The room numbered them
+   I to XIV, so the names below are the ones they had before it did. Eleven
+   is the exception: "Before that, I don't remember." — the only name the
+   index has for him is the one the room gave him, so his entry is ELEVEN.
+   Keep index 10 (entry 11) as ELEVEN; the ending screen holds him at the
+   same position. */
+const INDEX_DIRS = [
+  'ARMAN','NORA','ELIAS','MIRA','TOMAS','SAHAR','DANIEL',
+  'INES','MAREK','LEILA','ELEVEN','KIAN','OSKAR','YARA'
+];
+
+const TERM_HOST = 'fifteen@index:~$';
+let termRun = 0;            // bumped whenever the console opens or closes, cancels a stale print
+let termBusy = false;       // true while something is typing; input is locked
+let termSkip = false;       // set by a keypress or tap to flush the current print
+let terminalActive = false; // set by showScreen(); tells the game hotkeys to stand down
+const termHistory = [];
+let termHistPos = 0;
+
+function termLine(text, cls, cps, pause){
+  return { text:text, cls:cls || '', cps:cps || 420, pause:pause };
+}
+function termEl(){ return document.getElementById('termOut'); }
+function termScroll(){ const o = termEl(); if(o) o.scrollTop = o.scrollHeight; }
+function termNewLine(cls){
+  const el = document.createElement('div');
+  el.className = 'tl' + (cls ? ' ' + cls : '');
+  termEl().appendChild(el);
+  return el;
+}
+function termSetBusy(b){
+  termBusy = b;
+  if(!b) termSkip = false;
+  const out = termEl();
+  if(out) out.setAttribute('aria-busy', b ? 'true' : 'false');
+  const input = document.getElementById('termInput');
+  if(input){
+    input.disabled = b;
+    const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+    if(!b && terminalActive && !coarse) input.focus({ preventScroll:true });
+  }
+  document.querySelectorAll('.term-chip').forEach(x=>{ x.disabled = b; });
+}
+
+/* Typing engine. Characters are released against elapsed time, not frame
+   count, so the speed is the same on a 60 Hz phone and a 144 Hz monitor,
+   and a slow frame never makes it stutter. The key sound is throttled to
+   one tick per ~36 ms regardless of speed, so it reads as typing, not a
+   buzz. Resolves true when everything is printed, false if superseded. */
+function termPrint(lines, run){
+  return new Promise(resolve=>{
+    let li = 0, ci = 0, el = null, wait = 0, carry = 0, sinceKey = 0;
+    let last = performance.now();
+    function flush(){
+      if(el){
+        el.textContent = lines[li].text;
+        el.classList.remove('typing');
+        li++; el = null;
+      }
+      while(li < lines.length){
+        const L = lines[li++];
+        termNewLine(L.cls).textContent = L.text;
+      }
+      termScroll();
+    }
+    function frame(now){
+      if(run !== termRun){ resolve(false); return; }
+      if(termSkip){ flush(); resolve(true); return; }
+      const dt = Math.max(0, Math.min(64, now - last));
+      last = now;
+      if(wait > 0){ wait -= dt; requestAnimationFrame(frame); return; }
+      if(!el){
+        if(li >= lines.length){ resolve(true); return; }
+        const next = lines[li];
+        el = termNewLine(next.cls);
+        ci = 0; carry = 0;
+        if(!next.text){
+          li++; el = null;
+          wait = next.pause || 40;
+          termScroll();
+          requestAnimationFrame(frame);
+          return;
+        }
+        el.classList.add('typing');
+      }
+      const L = lines[li];
+      carry += dt / 1000 * L.cps;
+      const n = Math.floor(carry);
+      if(n > 0){
+        carry -= n;
+        ci = Math.min(L.text.length, ci + n);
+        el.textContent = L.text.slice(0, ci);
+        termScroll();
+        sinceKey += dt;
+        if(sinceKey >= 36){ sinceKey = 0; AudioSys.termKey(); }
+      }
+      if(ci >= L.text.length){
+        el.classList.remove('typing');
+        wait = (L.pause === undefined) ? 50 : L.pause;
+        li++; el = null;
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function guideLines(){
+  const L = [];
+  L.push(termLine('SUBJECT_INDEX // ENDINGS.DUMP', 'tl-name', 70, 240));
+  L.push(termLine('mounted read-only. 7 states on record. this file spoils every one of them.', 'tl-dim', 380, 420));
+  L.push(termLine('', '', 0, 140));
+  for(const e of ENDING_GUIDE){
+    L.push(termLine('> ' + e.name + (e.secret ? '   [hidden]' : ''), 'tl-name', 80, 220));
+    L.push(termLine('  requires  ' + e.need, 'tl-hang tl-req', 430, 160));
+    L.push(termLine('  outcome   ' + e.mean, 'tl-hang', 430, 420));
+    L.push(termLine('', '', 0, 80));
+  }
+  L.push(termLine('end of dump.', 'tl-dim', 120, 240));
+  L.push(termLine('the index has not been asked to give anything back.', 'tl-dim', 260, 500));
+  return L;
+}
+
+function helpLines(){
+  const rows = [
+    ['ls',       'list the subjects held in the index'],
+    ['cd <dir>', 'open a subject'],
+    ['dump',     'print the endings file again'],
+    ['clear',    'wipe the screen'],
+    ['exit',     'close the console (esc works too)']
+  ];
+  const L = [ termLine('commands', 'tl-dim', 300, 100) ];
+  rows.forEach(r => L.push(termLine('  ' + r[0].padEnd(10) + r[1], 'tl-hang', 420, 50)));
+  return L;
+}
+
+function lsLines(){
+  const L = [ termLine('index/   14 entries, names as filed before renumbering', 'tl-dim', 420, 140) ];
+  INDEX_DIRS.forEach((name, i)=>{
+    L.push(termLine(
+      '[DIR]  ' + String(i + 1).padStart(2, '0') + '  ' + name,
+      name === 'ELEVEN' ? 'tl-known' : '',
+      420, 45
+    ));
+  });
+  return L;
+}
+
+function termFindDir(arg){
+  const q = arg.replace(/\/+$/, '').toUpperCase();
+  let idx = INDEX_DIRS.indexOf(q);
+  if(idx < 0 && /^\d{1,2}$/.test(q)){
+    const n = parseInt(q, 10);
+    if(n >= 1 && n <= INDEX_DIRS.length) idx = n - 1;
+  }
+  return idx;
+}
+
+function cdLines(arg){
+  if(!arg) return [ termLine('cd: missing operand. usage: cd <dir>', 'tl-err', 500, 0) ];
+  const idx = termFindDir(arg);
+  if(idx < 0) return [ termLine('cd: ' + arg + ': no such directory', 'tl-err', 500, 0) ];
+  const name = INDEX_DIRS[idx];
+  return [ termLine(
+    'cd: ' + name + ': permission denied. entry is held.' +
+    (name === 'ELEVEN' ? ' he answers only through the drive.' : ''),
+    'tl-err', 500, 0
+  ) ];
+}
+
+/* Small hidden commands. Nothing here says anything the game has not
+   already said: Fifteen, the 23:00 reset, the knocks, and Eleven only
+   answering through the drive. They are deliberately absent from `help`. */
+function pingLines(arg){
+  if(!arg) return [ termLine('ping: usage: ping <dir>', 'tl-err', 500, 0) ];
+  const idx = termFindDir(arg);
+  if(idx < 0) return [ termLine('ping: ' + arg + ': unknown host', 'tl-err', 500, 0) ];
+  const name = INDEX_DIRS[idx];
+  return [
+    termLine('pinging ' + name + ' ...', 'tl-dim', 240, 900),
+    termLine(
+      'reply from ' + name + ': no route.' +
+      (name === 'ELEVEN' ? ' he answers only through the drive.' : ' entry is held.'),
+      'tl-err', 500, 0
+    )
+  ];
+}
+
+const termSleep = (ms)=> new Promise(r=>setTimeout(r, ms));
+
+/* three knocks, the third one slower and heavier, then the line the room
+   already believes. Timing is fixed: it does not shorten on skip. */
+async function termKnock(run){
+  const gaps = [0, 800, 1700];
+  for(let i = 0; i < 3; i++){
+    if(gaps[i]) await termSleep(gaps[i]);
+    if(run !== termRun) return;
+    AudioSys.termKnock(i === 2);
+    termSkip = false;
+    await termPrint([ termLine('knock.', i === 2 ? 'tl-name' : 'tl-dim', 200, 0) ], run);
+  }
+  await termSleep(1400);
+  if(run !== termRun) return;
+  termSkip = false;
+  await termPrint([ termLine('nobody asked you to answer.', 'tl-dim', 110, 0) ], run);
+}
+
+async function termSubmit(raw){
+  if(termBusy) return;
+  AudioSys.termEnter();
+  const echo = termNewLine('tl-cmd');
+  const pr = document.createElement('span');
+  pr.className = 'tl-prompt';
+  pr.textContent = TERM_HOST + ' ';
+  echo.appendChild(pr);
+  echo.appendChild(document.createTextNode(raw));
+  termScroll();
+
+  const line = raw.trim();
+  if(!line) return;
+  termHistory.push(line);
+  termHistPos = termHistory.length;
+
+  const parts = line.split(/\s+/);
+  const cmd = parts[0].toLowerCase();
+  const run = termRun;
+  let out;
+  switch(cmd){
+    case 'ls': case 'dir': out = lsLines(); break;
+    case 'help': case '?': out = helpLines(); break;
+    case 'dump': out = guideLines(); break;
+    case 'cd': out = cdLines(parts[1]); AudioSys.termErr(); break;
+    case 'whoami': out = [ termLine('FIFTEEN', 'tl-name', 120, 0) ]; break;
+    case 'date': out = [ termLine('23:00, again', '', 120, 0) ]; break;
+    case 'ping': out = pingLines(parts[1]); AudioSys.termErr(); break;
+    case 'knock':
+      termSetBusy(true);
+      await termKnock(run);
+      if(run === termRun) termSetBusy(false);
+      return;
+    case 'clear': case 'cls':
+      termEl().textContent = '';
+      return;
+    case 'exit': case 'quit': case 'back':
+      leaveTerminal();
+      return;
+    default:
+      out = [ termLine(parts[0] + ': command not found. type "help".', 'tl-err', 500, 0) ];
+      AudioSys.termErr();
+  }
+  termSetBusy(true);
+  await termPrint(out, run);
+  if(run === termRun) termSetBusy(false);
+}
+
+async function openTerminal(){
+  const run = ++termRun;
+  showScreen('lazyScreen');
+  termEl().textContent = '';
+  termSetBusy(true);
+  const lines = guideLines().concat([
+    termLine('', '', 0, 160),
+    termLine('session open. type "help" for commands.', 'tl-ok', 240, 0)
+  ]);
+  await termPrint(lines, run);
+  if(run !== termRun) return;
+  termSetBusy(false);
+  AudioSys.termOk();
+}
+
+function leaveTerminal(){
+  termRun++;
+  showScreen('mainMenu');
+}
+
+/* Keyboard while the console is up. The game's own hotkeys are switched off
+   in setupInput() (W/A/S/D would otherwise be swallowed as movement, and
+   E/I/J/Esc would open game panels behind the menu). Any key or tap skips
+   the typing; once it is finished, typing anywhere lands in the prompt. */
+function termKeydown(e){
+  if(!terminalActive) return;
+  if(e.key === 'Escape'){ e.preventDefault(); leaveTerminal(); return; }
+  if(termBusy){
+    if(e.key.length === 1 || e.key === 'Enter'){ termSkip = true; e.preventDefault(); }
+    return;
+  }
+  const input = document.getElementById('termInput');
+  const ae = document.activeElement;
+  if(ae !== input && !(ae && ae.tagName === 'BUTTON') &&
+     e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey){
+    input.focus();
+  }
+}
+
+function initTerminal(){
+  const input = document.getElementById('termInput');
+  const box = document.querySelector('.term');
+  if(!input || !box) return;
+
+  input.addEventListener('keydown', (e)=>{
+    if(e.isComposing) return;
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      const v = input.value;
+      input.value = '';
+      termSubmit(v);
+    } else if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      if(termHistPos > 0) termHistPos--;
+      input.value = termHistory[termHistPos] || '';
+    } else if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      if(termHistPos < termHistory.length) termHistPos++;
+      input.value = termHistory[termHistPos] || '';
+    }
+  });
+
+  box.addEventListener('pointerdown', ()=>{
+    if(termBusy){ termSkip = true; return; }
+    const coarse = window.matchMedia && window.matchMedia('(pointer:coarse)').matches;
+    if(!coarse) setTimeout(()=>input.focus({ preventScroll:true }), 0);
+  });
+
+  document.querySelectorAll('.term-chip').forEach(b=>{
+    b.addEventListener('click', ()=>{ if(!termBusy) termSubmit(b.dataset.cmd); });
+  });
+
+  window.addEventListener('keydown', termKeydown);
+}
+
 function resolveEnding(trigger, knockNum){
   if(S.ending) return;
   const cc = clueCount();
@@ -3321,9 +3913,12 @@ function showReleased(mode){
    SCREEN MANAGEMENT
    ========================================================= */
 function showScreen(id){
-  ['mainMenu','howToScreen','introScreen','gameScreen','pauseScreen','overScreen','endingScreen'].forEach(s=>{
+  ['mainMenu','howToScreen','lazyScreen','introScreen','gameScreen','pauseScreen','overScreen','endingScreen'].forEach(s=>{
     document.getElementById(s).classList.toggle('hidden', s!==id);
   });
+  terminalActive = (id === 'lazyScreen');
+  const appEl = document.getElementById('app');
+  if(appEl) appEl.classList.toggle('in-lazy', terminalActive);
 }
 
 /* =========================================================
@@ -3519,8 +4114,13 @@ function init(){
 
   document.getElementById('btnNewGame').addEventListener('click', startIntro);
   document.getElementById('btnContinue').addEventListener('click', continueGame);
-  document.getElementById('btnHowTo').addEventListener('click', ()=>showScreen('howToScreen'));
-  document.getElementById('btnHowToBack').addEventListener('click', ()=>showScreen('mainMenu'));
+document.getElementById('btnHowTo').addEventListener('click', ()=>showScreen('howToScreen'));
+document.getElementById('btnHowToBack').addEventListener('click', ()=>showScreen('mainMenu'));
+// the spoiler terminal prints from the top every time it is opened, and
+// leaving it mid-print cancels the run so a reopen starts clean
+document.getElementById('btnLazy').addEventListener('click', openTerminal);
+document.getElementById('btnLazyBack').addEventListener('click', leaveTerminal);
+initTerminal();
   document.getElementById('btnSkipIntro').addEventListener('click', skipIntro);
 
   document.getElementById('btnInv').addEventListener('click', toggleInventory);
